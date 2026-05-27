@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo Grupo Cercasa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --gold:        #C9A84C;
+      --gold-light:  #e8c76a;
+      --gold-dim:    #8a6e2f;
+      --black:       #0a0a0a;
+      --black-soft:  #111111;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background-color: var(--black);
+      color: var(--gold);
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Fondo sutil con patrón */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 50%, #1a1400 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, #1a1200 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    main {
+      position: relative;
+      text-align: center;
+      padding: 3rem 2rem;
+      max-width: 640px;
+      width: 100%;
+    }
+
+    /* Línea decorativa superior */
+    .ornament-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2.8rem;
+      opacity: 0.6;
+    }
+
+    .ornament-top span {
+      display: block;
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold));
+    }
+
+    .ornament-top span:last-child {
+      background: linear-gradient(to left, transparent, var(--gold));
+    }
+
+    .ornament-top svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--gold);
+      flex-shrink: 0;
+    }
+
+    /* Marca principal */
+    .brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(2.4rem, 8vw, 4rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .brand-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(0.85rem, 2.5vw, 1rem);
+      letter-spacing: 0.55em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 2.6rem;
+    }
+
+    /* Separador central */
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-bottom: 2.6rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      display: block;
+      height: 1px;
+      width: 90px;
+      background: linear-gradient(to right, transparent, var(--gold));
+    }
+
+    .divider::after {
+      background: linear-gradient(to left, transparent, var(--gold));
+    }
+
+    .divider-dot {
+      width: 6px;
+      height: 6px;
+      border: 1px solid var(--gold);
+      transform: rotate(45deg);
+      background: transparent;
+    }
+
+    /* Tagline */
+    .tagline {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: clamp(0.7rem, 2.2vw, 0.82rem);
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+
+    /* Línea decorativa inferior */
+    .ornament-bottom {
+      margin-top: 2.8rem;
+      opacity: 0.35;
+    }
+
+    .ornament-bottom span {
+      display: inline-block;
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .ornament-top span { width: 36px; }
+      .divider::before,
+      .divider::after { width: 56px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="ornament-top">
+      <span></span>
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="12,2 14.5,9.5 22,9.5 16,14 18.5,21.5 12,17 5.5,21.5 8,14 2,9.5 9.5,9.5"/>
+      </svg>
+      <span></span>
+    </div>
+
+    <h1 class="brand">Grupo Cercasa</h1>
+    <p class="brand-sub">Demo exclusiva</p>
+
+    <div class="divider">
+      <div class="divider-dot"></div>
+    </div>
+
+    <p class="tagline">Próximamente</p>
+
+    <div class="ornament-bottom">
+      <span></span>
+    </div>
+  </main>
+</body>
+</html>
