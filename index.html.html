@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+  <meta name="theme-color" content="#53B487">
+  <title>Grupo Cercasa · Sistema centralizado · Demo</title>
+  <link rel="icon" type="image/svg+xml" href="https://cercasa.es/images/logo/logo_verde23.svg">
+  <link rel="apple-touch-icon" href="https://cercasa.es/images/logo/logo_verde23.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cercasa: {
+              50:  '#F0FAF5',
+              100: '#DEF1E8',
+              200: '#B4DDC8',
+              300: '#85C7A6',
+              400: '#69BD96',
+              500: '#53B487',
+              600: '#3D9971',
+              700: '#317A5B',
+              800: '#2C6249',
+              900: '#1F4733',
+            },
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --cercasa-primary: #53B487;
+      --cercasa-dark: #2C6249;
+      --cercasa-tint: #DEF1E8;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+      background: #F6F6F6;
+      color: #111827;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    #root { min-height: 100vh; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+    @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .anim-fade { animation: fadeIn 0.3s ease-out; }
+    .anim-slide { animation: slideIn 0.4s ease-out; }
+    .anim-pop { animation: pop 0.25s ease-out; }
+    .typing-cursor::after { content: '▋'; color: #53B487; animation: blink 0.9s infinite; margin-left: 1px; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #C7C7C7; border-radius: 3px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #747474; }
+    .kpi-card { transition: transform 0.15s, box-shadow 0.15s; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+    .pipe-col { transition: background-color 0.2s; }
+    .pipe-col.dragover { background-color: #DEF1E8 !important; }
+    .pipe-card { cursor: grab; transition: transform 0.15s, box-shadow 0.15s; }
+    .pipe-card:active { cursor: grabbing; transform: rotate(2deg); }
+    .pipe-card.dragging { opacity: 0.4; }
+    .gradient-cercasa { background: linear-gradient(135deg, #53B487 0%, #2C6249 100%); }
+    .whatsapp-bg {
+      background-color: #E5DDD5;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='%23D9CFC4' fill-opacity='0.4'%3E%3Cpath d='M0 0h2v2H0zm10 10h2v2h-2zm10 10h2v2h-2zm10 10h2v2h-2zm-15 5h2v2h-2zM5 5h2v2H5z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    .phone-frame {
+      background: #1F4733;
+      border-radius: 32px;
+      padding: 10px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .phone-screen {
+      background: #ECE5DD;
+      border-radius: 24px;
+      overflow: hidden;
+      width: 280px;
+      height: 540px;
+      display: flex;
+      flex-direction: column;
+    }
+    .phone-statusbar {
+      background: #075E54;
+      color: white;
+      padding: 8px 14px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .phone-header {
+      background: #128C7E;
+      color: white;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .msg-bubble {
+      max-width: 75%;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.35;
+      box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+      word-wrap: break-word;
+      animation: pop 0.25s ease-out;
+    }
+    .msg-in { background: #FFFFFF; align-self: flex-start; border-top-left-radius: 0; }
+    .msg-out { background: #DCF8C6; align-self: flex-end; border-top-right-radius: 0; }
+    .msg-time { font-size: 9px; color: #999; margin-top: 2px; text-align: right; }
+    .msg-check { color: #4FC3F7; font-size: 11px; margin-left: 2px; }
+    .toast-enter { animation: slideIn 0.4s ease-out; }
+    .stat-arrow-up::before { content: '↑ '; color: #059669; }
+    .stat-arrow-down::before { content: '↓ '; color: #DC2626; }
+    .tooltip { position: relative; }
+    .tooltip:hover .tooltip-content { opacity: 1; visibility: visible; }
+    .tooltip-content {
+      position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+      padding: 6px 10px; background: #1F2937; color: white;
+      font-size: 11px; border-radius: 6px; white-space: nowrap;
+      opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s;
+      margin-bottom: 6px; z-index: 50;
+    }
+    .progress-bar { height: 4px; background: #E5E7EB; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #53B487; transition: width 0.5s; }
+    .sparkline path { stroke-dasharray: 200; stroke-dashoffset: 200; animation: drawLine 1.4s ease-out forwards; }
+    @keyframes drawLine { to { stroke-dashoffset: 0; } }
+    .tour-spotlight {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
+      z-index: 9000; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .tour-box {
+      background: white; border-radius: 16px; padding: 28px 32px;
+      max-width: 480px; box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+      animation: pop 0.3s ease-out;
+    }
+    @media (max-width: 768px) {
+      .phone-frame { display: none; }
+      .desktop-only { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="initial-loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#FFFFFF;z-index:9999;flex-direction:column;gap:16px;">
+  <img src="https://cercasa.es/images/logo/logo_verde23.svg" alt="Cercasa" style="height:48px;width:auto;">
+  <div style="color:#2C6249;font-weight:600;font-size:14px;">Cargando sistema centralizado…</div>
+  <div style="width:200px;height:3px;background:#DEF1E8;border-radius:2px;overflow:hidden;">
+    <div style="width:100%;height:100%;background:#53B487;animation:slideLoader 1.2s ease-in-out infinite;"></div>
+  </div>
+  <style>
+    @keyframes slideLoader { 0%{transform:translateX(-100%);} 50%{transform:translateX(0);} 100%{transform:translateX(100%);} }
+  </style>
+</div>
+
+<script>
+  window.onerror = function(msg, src, line, col, err) {
+    var loader = document.getElementById('initial-loader');
+    if (loader) {
+      loader.innerHTML = '<div style="text-align:center;padding:30px;max-width:520px;"><h3 style="color:#DC2626;margin-bottom:14px;">Error al cargar la demo</h3><p style="color:#374151;font-size:14px;margin-bottom:8px;">' + msg + '</p><p style="font-size:13px;color:#6B7280;">Avisa a Iván de Fyzon. Detalle: ' + src + ':' + line + '</p></div>';
+    }
+    return true;
+  };
+</script>
+
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+
+<script>
+(function() {
+  'use strict';
+  var h = React.createElement;
+  var useState = React.useState;
+  var useEffect = React.useEffect;
+  var useRef = React.useRef;
+  var useMemo = React.useMemo;
+  var Fragment = React.Fragment;
+
+  // ─────────────────────────────────────────────────────────────
+  // STORAGE
+  // ─────────────────────────────────────────────────────────────
+  var STORAGE_KEY = 'cercasa-demo-v2';
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function saveState(patch) {
+    try {
+      var cur = loadState();
+      var next = Object.assign({}, cur, patch);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch (e) {}
+  }
+  function resetState() { try { localStorage.removeItem(STORAGE_KEY); location.reload(); } catch (e) {} }
+
+  // ─────────────────────────────────────────────────────────────
+  // ICONS (inline SVG paths)
+  // ─────────────────────────────────────────────────────────────
+  function Icon(props) {
+    var d = props.d;
+    var s = props.size || 20;
+    return h('svg', {
+      width: s, height: s, viewBox: '0 0 24 24', fill: 'none',
+      stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round',
+      'aria-hidden': true,
+    }, h('path', { d: d }));
+  }
+  var I = {
+    home:       'M3 12l9-9 9 9M5 10v10h14V10',
+    target:     'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+    key:        'M21 3l-6 6m0 0a4 4 0 1 1-5.66 5.66L3 21l-3-3 6.34-6.34A4 4 0 1 1 12 6l3-3 6 0z',
+    refresh:    'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5',
+    sparkles:   'M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM19 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1z',
+    bell:       'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
+    logout:     'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9',
+    search:     'M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16zM21 21l-4.35-4.35',
+    chevronDown:'M6 9l6 6 6-6',
+    chevronRight:'M9 18l6-6-6-6',
+    user:       'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+    phone:      'M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z',
+    mail:       'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6',
+    whatsapp:   'M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9zM9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0zm5 0a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0zm-5.5 4a3.5 3.5 0 0 0 7 0',
+    clock:      'M12 6v6l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z',
+    check:      'M20 6L9 17l-5-5',
+    x:          'M18 6L6 18M6 6l12 12',
+    alert:      'M12 9v4M12 17v.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z',
+    building:   'M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01M9 18v.01',
+    plus:       'M12 5v14M5 12h14',
+    filter:     'M22 3H2l8 9.46V19l4 2v-8.54L22 3z',
+    map:        'M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4zM8 2v16M16 6v16',
+    sliders:    'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6',
+    cpu:        'M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3M5 7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM9 9h6v6H9z',
+    layers:     'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
+    document:   'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',
+    play:       'M5 3l14 9-14 9V3z',
+    arrowRight: 'M5 12h14M12 5l7 7-7 7',
+    star:       'M12 2l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.77l-6.18 3.24L7 14.13 2 9.26l6.91-1z',
+    euro:       'M19 4H9a7 7 0 1 0 0 14h10M3 10h12M3 14h12',
+    trending:   'M23 6l-9.5 9.5-5-5L1 18M17 6h6v6',
+    settings:   'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',
+    menu:       'M3 12h18M3 6h18M3 18h18',
+    send:       'M22 2L11 13M22 2l-7 20-4-9-9-4z',
+    eye:        'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+    calendar:   'M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM16 2v4M8 2v4M3 10h18',
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // USERS · 7 reales del equipo Cercasa
+  // ─────────────────────────────────────────────────────────────
+  var USERS = [
+    { id: 'cesar',    firstName: 'César',    lastName: 'Ríos',      role: 'CEO · Fundador',                   color: '#2C6249', initials: 'CR' },
+    { id: 'gisela',   firstName: 'Gisela',   lastName: 'Maltoni',   role: 'Responsable Ventas/Alquiler',      color: '#53B487', initials: 'GM' },
+    { id: 'patricia', firstName: 'Patricia', lastName: 'Torres',    role: 'Comercial Alquileres',             color: '#0EA5E9', initials: 'PT' },
+    { id: 'liliana',  firstName: 'Liliana',  lastName: 'Ruiz',      role: 'Comercial Alquileres',             color: '#A855F7', initials: 'LR' },
+    { id: 'german',   firstName: 'Germán',   lastName: 'Martínez',  role: 'Comercial Ventas',                 color: '#F59E0B', initials: 'GE' },
+    { id: 'roman',    firstName: 'Román',    lastName: 'Castejón',  role: 'Comercial Ventas',                 color: '#EC4899', initials: 'RC' },
+    { id: 'roxxana',  firstName: 'Roxxana',  lastName: 'Rosales',   role: 'Portales Inmobiliarios',           color: '#14B8A6', initials: 'RR' },
+  ];
+
+  // ─────────────────────────────────────────────────────────────
+  // SEED DATA · 100% Valencia · datos coherentes con Cercasa
+  // ─────────────────────────────────────────────────────────────
+  var BARRIOS = ['Russafa', 'Benimaclet', 'Mestalla', 'Patraix', 'Campanar', 'El Carmen', 'Ciutat Vella', 'Algirós', 'Camins al Grau', 'L\'Eixample'];
+  var MUNICIPIOS = ['Godella', 'Sagunto', 'La Pobla de Vallbona', 'Benaguacil', 'Náquera', 'Massamagrell', 'Vinalesa', 'Albal', 'Massamagrell', 'Serra'];
+
+  // 25 alquileres activos con fechas vencimiento distribuidas
+  var hoy = new Date(2026, 4, 26); // 2026-05-26
+  function diaSuma(dias) { var d = new Date(hoy); d.setDate(d.getDate() + dias); return d; }
+  function fmtFecha(d) { return d.getDate().toString().padStart(2,'0') + '/' + (d.getMonth()+1).toString().padStart(2,'0') + '/' + d.getFullYear(); }
+
+  var ALQUILERES = [
+    // 4 ROJO (≤30 días) — urgentes
+    { id:'A001', dir:'Av. Primado Reig 48 · 4ºB', barrio:'Mestalla', m2:78, hab:3, renta:920,  inquilino:'Laura Sanchis Tortajada',  propietario:'Familia Beneyto Vives',   inicio:'01/06/2022', fin: diaSuma(87),  anyos:3,  estadoRen:'pendiente', tipo:'piso',  llamado:'Patricia', vipInquilino:true },
+    { id:'A002', dir:'C/ Sorní 12 · 2ºA',         barrio:'L\'Eixample', m2:95, hab:3, renta:1450, inquilino:'Jordi Aragó Marí',        propietario:'Inmuebles Tarazona SL',   inicio:'15/08/2021', fin: diaSuma(15),  anyos:4,  estadoRen:'pendiente', tipo:'piso',  llamado:'Liliana',  vipInquilino:false },
+    { id:'A003', dir:'C/ Cirilo Amorós 90',        barrio:'L\'Eixample', m2:110, hab:4, renta:1700, inquilino:'María Llinares Ferrer',   propietario:'Vicente Catalá Soler',    inicio:'01/03/2023', fin: diaSuma(8),   anyos:3,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',        vipInquilino:false },
+    { id:'A004', dir:'C/ Doctor Manuel Candela 25', barrio:'Algirós', m2:65, hab:2, renta:780,  inquilino:'Carlos Boix Bayarri',     propietario:'Ana Folguera Tortajada',  inicio:'01/05/2025', fin: diaSuma(27),  anyos:1,  estadoRen:'pendiente', tipo:'piso',  llamado:'Patricia', vipInquilino:false },
+
+    // 6 NARANJA (31-90 días)
+    { id:'A005', dir:'C/ Conde Salvatierra 18 · 1ºD', barrio:'L\'Eixample', m2:85, hab:3, renta:1300, inquilino:'Sergio Vives Roig',       propietario:'Promociones Llinares SL', inicio:'01/01/2023', fin: diaSuma(42),  anyos:3,  estadoRen:'pendiente', tipo:'piso',  llamado:'Liliana', vipInquilino:false },
+    { id:'A006', dir:'C/ Reina Doña Germana 5',     barrio:'Russafa', m2:72, hab:2, renta:1050, inquilino:'Andrea Sancho Castelló',   propietario:'Familia Ribelles Pérez',  inicio:'01/06/2024', fin: diaSuma(58),  anyos:2,  estadoRen:'pendiente', tipo:'piso',  llamado:'Patricia', vipInquilino:true },
+    { id:'A007', dir:'Av. Aragón 17 · 3ºC',        barrio:'Mestalla', m2:88, hab:3, renta:1180, inquilino:'Vicent Bayarri Tortajada', propietario:'Inversiones Mestalla SL', inicio:'01/04/2024', fin: diaSuma(63),  anyos:2,  estadoRen:'pendiente', tipo:'piso',  llamado:'Liliana',  vipInquilino:false },
+    { id:'A008', dir:'C/ Cuba 36 · bajo',          barrio:'Russafa', m2:55, hab:1, renta:850,  inquilino:'Lucía Tarazona Marí',     propietario:'Promo Russafa 360 SL',    inicio:'01/12/2024', fin: diaSuma(75),  anyos:1,  estadoRen:'pendiente', tipo:'piso',  llamado:'Patricia', vipInquilino:false },
+    { id:'A009', dir:'C/ Conde de Altea 22',       barrio:'L\'Eixample', m2:120, hab:4, renta:1800, inquilino:'Ramón Soler Folguera',    propietario:'Familia García-Bayarri',  inicio:'01/02/2025', fin: diaSuma(82),  anyos:1,  estadoRen:'pendiente', tipo:'piso',  llamado:'-',       vipInquilino:false },
+    { id:'A010', dir:'C/ Sevilla 8 · local',       barrio:'Russafa', m2:90, hab:0, renta:1650, inquilino:'Cafetería Sant Andreu SL',propietario:'Inversiones Hispania SL', inicio:'01/03/2024', fin: diaSuma(89),  anyos:2,  estadoRen:'pendiente', tipo:'local', llamado:'Gisela',   vipInquilino:false },
+
+    // 8 AMARILLO (91-180 días)
+    { id:'A011', dir:'C/ Tarongers 88 · 2ºA',      barrio:'Algirós', m2:75, hab:3, renta:870,  inquilino:'Marta Roig Llinares',     propietario:'Vivienda Roig SL',        inicio:'01/01/2024', fin: diaSuma(120), anyos:2,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A012', dir:'Pl. Cánovas del Castillo 4', barrio:'L\'Eixample', m2:130, hab:4, renta:2100, inquilino:'Javier Catalá Soler',     propietario:'Patrimonio Catalá SL',    inicio:'01/06/2023', fin: diaSuma(135), anyos:3,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:true },
+    { id:'A013', dir:'Av. del Cid 60 · 5ºA',       barrio:'Patraix', m2:80, hab:3, renta:780,  inquilino:'Cristina Marí Aragó',     propietario:'Inmuebles Patraix SL',    inicio:'01/04/2024', fin: diaSuma(145), anyos:2,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A014', dir:'C/ Pintor Maella 12 · 1ºA',  barrio:'Camins al Grau', m2:92, hab:3, renta:990,  inquilino:'Alejandro Ferrer Boix',   propietario:'María Salvador Vives',    inicio:'01/09/2024', fin: diaSuma(150), anyos:1,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A015', dir:'C/ Pizarro 22 · 3ºB',        barrio:'L\'Eixample', m2:78, hab:2, renta:1180, inquilino:'Patricia Bayarri Marí',   propietario:'Family Office Pizarro',   inicio:'01/02/2024', fin: diaSuma(160), anyos:2,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A016', dir:'Vinalesa · C/ Major 14',     barrio:'Vinalesa', m2:140, hab:4, renta:780,  inquilino:'Familia Ribera Sancho',    propietario:'Patrimonio Vinalesa SL',  inicio:'01/01/2024', fin: diaSuma(170), anyos:2,  estadoRen:'sin contactar', tipo:'casa',  llamado:'-',  vipInquilino:false },
+    { id:'A017', dir:'C/ Burriana 28 · 4ºB',       barrio:'Russafa', m2:68, hab:2, renta:990,  inquilino:'Diego Aragó Tortajada',   propietario:'Inversiones Burriana SL', inicio:'01/06/2023', fin: diaSuma(175), anyos:3,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A018', dir:'Godella · Urb. Campo Olivar 12', barrio:'Godella', m2:280, hab:5, renta:1750, inquilino:'Familia Llinares Boix',   propietario:'Heredades Godella SL',    inicio:'01/05/2024', fin: diaSuma(178), anyos:2,  estadoRen:'sin contactar', tipo:'casa', llamado:'-',  vipInquilino:true },
+
+    // 7 VERDE (>180 días) — estables, no urgentes
+    { id:'A019', dir:'C/ Sueca 47 · 1ºB',          barrio:'Russafa', m2:64, hab:2, renta:920,  inquilino:'Lucía Soler Catalá',      propietario:'Pequeño propietario',     inicio:'01/02/2025', fin: diaSuma(210), anyos:1,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A020', dir:'C/ Almirante Cadarso 30',    barrio:'L\'Eixample', m2:100, hab:3, renta:1550, inquilino:'Eva Marí Folguera',       propietario:'Familia Albelda',         inicio:'01/03/2025', fin: diaSuma(245), anyos:1,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A021', dir:'C/ Hernán Cortés 9',         barrio:'L\'Eixample', m2:88, hab:3, renta:1390, inquilino:'Carlos Vives Beneyto',    propietario:'Patrimonio Hernán SL',    inicio:'01/04/2025', fin: diaSuma(270), anyos:1,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A022', dir:'C/ Conde Salvatierra 60',    barrio:'L\'Eixample', m2:115, hab:4, renta:1690, inquilino:'Ana Ferrer Sancho',       propietario:'Empresarial Salvatierra', inicio:'01/05/2025', fin: diaSuma(290), anyos:1,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A023', dir:'Massamagrell · C/ La Llum 8',barrio:'Massamagrell', m2:160, hab:4, renta:850,  inquilino:'Familia Tortajada Ribera',propietario:'Heredades Massamagrell',  inicio:'01/05/2025', fin: diaSuma(310), anyos:1,  estadoRen:'sin contactar', tipo:'casa', llamado:'-',  vipInquilino:false },
+    { id:'A024', dir:'C/ Doctor Sumsi 14 · 2ºC',   barrio:'Russafa', m2:70, hab:2, renta:1050, inquilino:'Rubén Castelló Soler',    propietario:'Inmuebles Russafa SL',    inicio:'15/04/2025', fin: diaSuma(330), anyos:1,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+    { id:'A025', dir:'C/ Maestro Aguilar 5',       barrio:'Russafa', m2:82, hab:3, renta:1190, inquilino:'Familia Catalá Soler',    propietario:'Propietario individual',  inicio:'01/05/2025', fin: diaSuma(340), anyos:1,  estadoRen:'sin contactar', tipo:'piso', llamado:'-',  vipInquilino:false },
+  ];
+
+  // 8 leads Meta Ads en el pipeline
+  var LEADS = [
+    { id:'L001', nombre:'María Tortajada Ferrer', tel:'+34 612 84 23 11', zona:'Russafa', tipo:'Piso 3 hab', motivo:'Traslado laboral a Madrid', precio:220000, fuente:'Meta Ads', estado:'CUALIFICADO', asignado:'german', score:88, ts:'hace 14 min', motivacion:'alta', notasIA:'Necesita vender en 60-90 días por mudanza. Acepta visita esta semana. Decisor único.' },
+    { id:'L002', nombre:'José Llinares Beneyto', tel:'+34 638 11 92 04', zona:'Benimaclet', tipo:'Piso 2 hab', motivo:'Necesita liquidez', precio:165000, fuente:'Meta Ads', estado:'CUALIFICADO', asignado:'roman', score:82, ts:'hace 38 min', motivacion:'media-alta', notasIA:'Comparte titularidad con su hermana, decisión a dos. Realista con precio mercado. Sin prisa pero motivado.' },
+    { id:'L003', nombre:'Ana Boix Castelló', tel:'+34 661 02 14 88', zona:'Mestalla', tipo:'Piso 3 hab', motivo:'Quiero saber cuánto vale', precio:null, fuente:'Meta Ads', estado:'CONTACTADO WhatsApp', asignado:null, score:54, ts:'hace 1 h', motivacion:'baja', notasIA:'Curiosidad. No tiene intención clara de venta a 6 meses. Lead "valoración exploratoria".' },
+    { id:'L004', nombre:'Pedro Catalá Soler', tel:'+34 626 73 81 92', zona:'Patraix', tipo:'Local comercial', motivo:'Cambio de actividad', precio:350000, fuente:'Meta Ads', estado:'CUALIFICADO', asignado:'german', score:91, ts:'hace 2 h', motivacion:'alta', notasIA:'Local comercial 180m² c/oficinas. Vende por jubilación. Acepta exclusiva. URGENTE.' },
+    { id:'L005', nombre:'Luis Marí Bayarri', tel:'+34 644 30 25 17', zona:'Campanar', tipo:'Piso 4 hab', motivo:'Cambio a casa más grande', precio:295000, fuente:'Formulario web', estado:'CONTACTADO TEL', asignado:'roman', score:71, ts:'hace 3 h', motivacion:'media', notasIA:'Familia con 2 hijos. Quiere casa con jardín. Venta condicionada a encontrar compra primero.' },
+    { id:'L006', nombre:'Inversiones Hispania SL', tel:'+34 963 45 92 18', zona:'Russafa', tipo:'Edificio entero', motivo:'Desinversión', precio:1800000, fuente:'Referido', estado:'CUALIFICADO', asignado:'cesar', score:96, ts:'hace 5 h', motivacion:'alta', notasIA:'Inversor profesional. Vende edificio rehabilitado de 4 pisos. Negociación con CEO. Cifra alta.' },
+    { id:'L007', nombre:'Roberto Sancho Vives', tel:'+34 678 92 14 02', zona:'Godella', tipo:'Chalet', motivo:'Sin intención clara', precio:null, fuente:'Meta Ads', estado:'DESCARTADO BASURA', asignado:null, score:18, ts:'hace 6 h', motivacion:'nula', notasIA:'Datos inconsistentes (teléfono no responde, email rebota). Clasificado lead basura tras 3 intentos sin éxito.' },
+    { id:'L008', nombre:'Carmen Folguera Aragó', tel:'+34 651 47 02 81', zona:'Algirós', tipo:'Piso 2 hab', motivo:'Herencia recibida', precio:175000, fuente:'Meta Ads', estado:'NUEVO', asignado:null, score:null, ts:'hace 2 min', motivacion:'desconocida', notasIA:'Recién entrado. IA aún no ha hecho primer contacto. Mensaje WhatsApp enviado.' },
+  ];
+
+  // KPIs Dashboard
+  function ymd(d){ return d.toISOString().slice(0,10); }
+  var KPIS = [
+    { label: 'Propiedades en cartera',     value: '247',     trend: '+12 vs mes ant.', icon: I.building,  color: 'cercasa-600' },
+    { label: 'Alquileres activos',         value: '2.014',   trend: '+18 vs mes ant.', icon: I.key,       color: 'cercasa-700' },
+    { label: 'Leads venta · semana',       value: '47',      trend: '+8 vs sem. ant.', icon: I.target,    color: 'cercasa-500' },
+    { label: 'Alquileres venciendo 90 d',  value: '18',      trend: '⚠ 4 críticos',     icon: I.alert,     color: 'amber-600' },
+    { label: 'Conv. Meta Ads cualificado', value: '32%',     trend: '+9 pts vs Q1',    icon: I.trending,  color: 'cercasa-600' },
+    { label: 'Comisiones MTD',             value: '38.420 €',trend: '+22% YoY',         icon: I.euro,      color: 'cercasa-800' },
+  ];
+
+  // Notificaciones simuladas tiempo real
+  var NOTIFS = [
+    { t:0,    msg:'Nuevo lead Meta Ads · Russafa 220k €',  type:'lead',     who:'María Tortajada Ferrer' },
+    { t:18,   msg:'Contrato Av. Primado Reig 48 vence en 87 días · IA inició sondeo a Laura Sanchis', type:'renovacion', who:'Patricia' },
+    { t:34,   msg:'Lead cualificado L001 asignado a Germán Martínez · score 88', type:'asignacion', who:'Germán' },
+    { t:55,   msg:'Inquilino C/ Cuba 36 confirma interés en comprar · IA pasa a fase visita',  type:'conversion', who:'Lucía Tarazona' },
+    { t:78,   msg:'Pedro Catalá pide segunda visita local Patraix · agenda Germán mañana 11h', type:'visita',   who:'Germán' },
+  ];
+
+  // ─────────────────────────────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────────────────────────────
+  function cls() {
+    var out = [];
+    for (var i = 0; i < arguments.length; i++) if (arguments[i]) out.push(arguments[i]);
+    return out.join(' ');
+  }
+  function eur(n) { return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n); }
+  function diasHasta(d) { return Math.ceil((d - hoy) / (1000 * 60 * 60 * 24)); }
+  function colorVencimiento(dias) {
+    if (dias <= 30) return { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500', label: 'CRÍTICO' };
+    if (dias <= 90) return { bg: 'bg-orange-100', text: 'text-orange-700', dot: 'bg-orange-500', label: 'URGENTE' };
+    if (dias <= 180) return { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500', label: 'PRÓXIMO' };
+    return { bg: 'bg-green-100', text: 'text-green-700', dot: 'bg-green-500', label: 'ESTABLE' };
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · Avatar
+  // ─────────────────────────────────────────────────────────────
+  function Avatar(props) {
+    var user = props.user;
+    var size = props.size || 36;
+    var ring = props.ring;
+    if (!user) return null;
+    return h('div', {
+      style: {
+        width: size, height: size, background: user.color, color: 'white',
+        borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontWeight: 700, fontSize: size * 0.36, flexShrink: 0,
+        boxShadow: ring ? '0 0 0 3px ' + user.color + '33' : 'none',
+      },
+    }, user.initials);
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · Login Screen
+  // ─────────────────────────────────────────────────────────────
+  function LoginScreen(props) {
+    return h('div', { className: 'min-h-screen flex flex-col items-center justify-center p-6 gradient-cercasa' },
+      h('div', { className: 'bg-white rounded-2xl shadow-2xl p-8 md:p-10 max-w-2xl w-full anim-fade' },
+        h('div', { className: 'flex items-center gap-4 mb-2' },
+          h('img', { src: 'https://cercasa.es/images/logo/logo_verde23.svg', alt: 'Cercasa', style: { height: 44 } }),
+          h('div', { className: 'border-l border-gray-200 pl-4' },
+            h('div', { className: 'text-xs font-semibold tracking-wide text-cercasa-700 uppercase' }, 'Sistema centralizado'),
+            h('div', { className: 'text-sm text-gray-500' }, 'Operativa interna · Cercasa')
+          )
+        ),
+        h('p', { className: 'text-gray-500 text-sm mt-1 mb-6 italic' }, '"El lugar donde te sientes en casa"'),
+        h('div', { className: 'border-t border-gray-200 pt-6' },
+          h('div', { className: 'text-xs font-semibold tracking-wide text-gray-500 uppercase mb-4' }, 'Elige tu perfil para entrar'),
+          h('div', { className: 'grid grid-cols-1 sm:grid-cols-2 gap-2' },
+            USERS.map(function(u) {
+              return h('button', {
+                key: u.id,
+                onClick: function() { props.onLogin(u); },
+                className: 'flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 hover:border-cercasa-500 hover:bg-cercasa-50 transition-all text-left group',
+              },
+                h(Avatar, { user: u, size: 40 }),
+                h('div', { className: 'flex-1 min-w-0' },
+                  h('div', { className: 'font-semibold text-sm text-gray-900 truncate' }, u.firstName + ' ' + u.lastName),
+                  h('div', { className: 'text-xs text-gray-500 truncate' }, u.role)
+                ),
+                h('div', { className: 'opacity-0 group-hover:opacity-100 transition-opacity text-cercasa-500' },
+                  h(Icon, { d: I.arrowRight, size: 16 })
+                )
+              );
+            })
+          )
+        ),
+        h('div', { className: 'mt-6 pt-6 border-t border-gray-200 flex items-center justify-between text-xs text-gray-400' },
+          h('span', null, 'Demo · prototipo a validar'),
+          h('span', null, 'v0.2 · 2026-05-26')
+        )
+      )
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · Sidebar
+  // ─────────────────────────────────────────────────────────────
+  function Sidebar(props) {
+    var view = props.view, setView = props.setView, expanded = props.expanded, setExpanded = props.setExpanded, user = props.user;
+    var items = [
+      { id:'dashboard',   label:'Dashboard',           icon:I.home,     badge: null },
+      { id:'captador',    label:'Captador IA · Venta', icon:I.target,   badge:'8', accent: true },
+      { id:'alquileres',  label:'Alquileres activos',  icon:I.key,      badge:'2.014' },
+      { id:'renovacion',  label:'Agente Renovación',   icon:I.refresh,  badge:'4', alert: true },
+      { id:'asistente',   label:'Asistente IA',        icon:I.sparkles, badge: null },
+    ];
+    return h('aside', {
+      className: cls(
+        'flex flex-col bg-cercasa-900 text-cercasa-50 transition-all duration-200 flex-shrink-0',
+        expanded ? 'w-64' : 'w-16'
+      ),
+      style: { minHeight: '100vh' },
+    },
+      h('div', { className: 'p-3 flex items-center gap-2 border-b border-cercasa-800' },
+        h('button', {
+          onClick: function() { setExpanded(!expanded); },
+          className: 'p-2 rounded-lg hover:bg-cercasa-800 transition-colors',
+        }, h(Icon, { d: I.menu, size: 18 })),
+        expanded && h('div', { className: 'flex items-center gap-2 anim-fade' },
+          h('img', { src: 'https://cercasa.es/images/logo/logo_verde23.svg', alt: 'Cercasa', style: { height: 22, filter: 'brightness(0) invert(1)' } }),
+          h('div', { className: 'text-xs text-cercasa-200' }, 'Cercasa')
+        )
+      ),
+      h('nav', { className: 'flex-1 p-2 space-y-1' },
+        items.map(function(it) {
+          var active = view === it.id;
+          return h('button', {
+            key: it.id,
+            onClick: function() { setView(it.id); },
+            className: cls(
+              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group relative',
+              active ? 'bg-cercasa-500 text-white' : 'text-cercasa-100 hover:bg-cercasa-800'
+            ),
+            title: !expanded ? it.label : '',
+          },
+            h(Icon, { d: it.icon, size: 18 }),
+            expanded && h('span', { className: 'flex-1 text-sm font-medium text-left anim-fade' }, it.label),
+            expanded && it.badge && h('span', {
+              className: cls(
+                'text-xs font-semibold px-2 py-0.5 rounded-full',
+                it.alert ? 'bg-red-500 text-white' : (it.accent ? 'bg-white text-cercasa-700' : 'bg-cercasa-700 text-cercasa-100')
+              )
+            }, it.badge),
+            !expanded && it.badge && h('span', {
+              className: cls(
+                'absolute top-1 right-1 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center',
+                it.alert ? 'bg-red-500 text-white' : 'bg-cercasa-500 text-white'
+              )
+            }, it.badge)
+          );
+        })
+      ),
+      h('div', { className: 'p-3 border-t border-cercasa-800 flex items-center gap-3' },
+        h(Avatar, { user: user, size: 36 }),
+        expanded && h('div', { className: 'flex-1 min-w-0 anim-fade' },
+          h('div', { className: 'text-sm font-semibold truncate' }, user.firstName + ' ' + user.lastName),
+          h('div', { className: 'text-xs text-cercasa-300 truncate' }, user.role)
+        ),
+        expanded && h('button', {
+          onClick: props.onLogout,
+          className: 'p-2 rounded-lg hover:bg-cercasa-800 transition-colors text-cercasa-200',
+          title: 'Salir',
+        }, h(Icon, { d: I.logout, size: 16 }))
+      )
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · Topbar
+  // ─────────────────────────────────────────────────────────────
+  function Topbar(props) {
+    var title = props.title, subtitle = props.subtitle, user = props.user;
+    return h('div', { className: 'bg-white border-b border-gray-200 px-5 md:px-8 py-4 flex items-center justify-between flex-shrink-0' },
+      h('div', null,
+        h('h1', { className: 'text-lg md:text-xl font-bold text-gray-900' }, title),
+        subtitle && h('p', { className: 'text-xs md:text-sm text-gray-500 mt-0.5' }, subtitle)
+      ),
+      h('div', { className: 'flex items-center gap-2 md:gap-3' },
+        h('div', { className: 'hidden md:flex items-center gap-2 text-xs text-gray-500 px-3 py-1.5 rounded-lg bg-gray-50' },
+          h('span', { className: 'w-2 h-2 rounded-full bg-green-500 inline-block', style: { animation: 'pulse 2s infinite' } }),
+          'Sistema activo · 47 conexiones'
+        ),
+        h('button', {
+          onClick: function() { if (confirm('¿Reiniciar la demo a estado inicial?')) resetState(); },
+          className: 'text-xs text-gray-500 hover:text-cercasa-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors',
+          title: 'Reset demo',
+        }, '↻ Reset'),
+        h('div', { className: 'tooltip' },
+          h(Avatar, { user: user, size: 36 }),
+          h('div', { className: 'tooltip-content' }, user.firstName + ' · ' + user.role)
+        )
+      )
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · DashboardView
+  // ─────────────────────────────────────────────────────────────
+  function Sparkline(props) {
+    var data = props.data || [3, 5, 4, 7, 6, 9, 8, 11, 10, 13];
+    var w = 80, hh = 28;
+    var max = Math.max.apply(null, data), min = Math.min.apply(null, data);
+    var pts = data.map(function(v, i) {
+      var x = (i / (data.length - 1)) * w;
+      var y = hh - ((v - min) / (max - min || 1)) * hh;
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+    return h('svg', { width: w, height: hh, className: 'sparkline' },
+      h('polyline', { points: pts, fill: 'none', stroke: props.color || '#53B487', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' })
+    );
+  }
+
+  function CounterValue(props) {
+    var target = props.target || 0;
+    var suffix = props.suffix || '';
+    var prefix = props.prefix || '';
+    var dur = 1000;
+    var ref = useRef(target);
+    var anchor = useState(0)[1];
+    var current = useState(0);
+    useEffect(function() {
+      var start = 0, t0 = performance.now();
+      function step(t) {
+        var p = Math.min(1, (t - t0) / dur);
+        var v = Math.floor(start + (target - start) * (1 - Math.pow(1 - p, 3)));
+        current[1](v);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }, []);
+    return h('span', null, prefix + (current[0]).toLocaleString('es-ES') + suffix);
+  }
+
+  function DashboardView(props) {
+    var user = props.user;
+    var notifs = props.notifs;
+    return h('div', { className: 'p-5 md:p-8 space-y-6 max-w-[1600px] mx-auto' },
+      h('div', { className: 'rounded-2xl p-6 md:p-8 gradient-cercasa text-white shadow-xl anim-fade' },
+        h('div', { className: 'flex items-start justify-between flex-wrap gap-4' },
+          h('div', null,
+            h('p', { className: 'text-cercasa-100 text-sm font-medium' }, 'Hola ' + user.firstName + ' · martes 26 de mayo'),
+            h('h2', { className: 'text-2xl md:text-3xl font-bold mt-1' }, 'Buenos días.'),
+            h('p', { className: 'text-cercasa-100 mt-2 text-sm md:text-base max-w-2xl' },
+              'Hoy hay ', h('strong', { className: 'text-white' }, '4 alquileres críticos'),
+              ' venciendo en menos de 30 días y ',
+              h('strong', { className: 'text-white' }, '8 leads nuevos'),
+              ' esperando cualificación en el Captador IA.'
+            )
+          ),
+          h('div', { className: 'text-right' },
+            h('div', { className: 'text-xs text-cercasa-200 uppercase tracking-wide font-semibold' }, 'Operativa habitual'),
+            h('div', { className: 'text-3xl font-bold mt-1' }, '€38.420'),
+            h('div', { className: 'text-xs text-cercasa-100' }, 'Comisiones este mes')
+          )
+        )
+      ),
+
+      h('div', { className: 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4' },
+        KPIS.map(function(k, i) {
+          return h('div', { key: i, className: 'kpi-card bg-white rounded-xl p-4 border border-gray-100 shadow-sm' },
+            h('div', { className: 'flex items-center justify-between mb-2' },
+              h('span', { className: 'text-' + k.color },
+                h(Icon, { d: k.icon, size: 18 })
+              ),
+              h(Sparkline, { color: k.color === 'amber-600' ? '#D97706' : '#53B487' })
+            ),
+            h('div', { className: 'text-xs text-gray-500 font-medium' }, k.label),
+            h('div', { className: cls('text-xl md:text-2xl font-bold mt-1', 'text-' + k.color) }, k.value),
+            h('div', { className: 'text-[10px] text-gray-400 mt-1' }, k.trend)
+          );
+        })
+      ),
+
+      h('div', { className: 'grid lg:grid-cols-3 gap-6' },
+        h('div', { className: 'lg:col-span-2 bg-white rounded-2xl p-5 md:p-6 border border-gray-100 shadow-sm' },
+          h('div', { className: 'flex items-center justify-between mb-4' },
+            h('h3', { className: 'font-bold text-gray-900' }, 'Cadencia multicanal · últimas 24h'),
+            h('span', { className: 'text-xs text-cercasa-600 font-medium bg-cercasa-50 px-3 py-1 rounded-full' }, 'IA activa 24/7')
+          ),
+          h('div', { className: 'space-y-4' },
+            [
+              { label:'WhatsApp instantáneos enviados',   val:  47, max: 47, color:'#53B487', sub:'100% de los leads recibieron WhatsApp en menos de 90 segundos' },
+              { label:'Llamadas IA en T+1h (no respondió)', val: 18, max: 21, color:'#69BD96', sub:'18 contestaron · 3 reagendado · 0 perdido' },
+              { label:'Emails enviados en T+24h',         val:   9, max:  9, color:'#85C7A6', sub:'9 emails escalados con plantilla personalizada por contexto' },
+              { label:'Recontactos WhatsApp en T+72h',    val:   4, max:  4, color:'#B4DDC8', sub:'4 leads aún en seguimiento · 2 reactivados al recontacto' },
+            ].map(function(row, i) {
+              return h('div', { key: i },
+                h('div', { className: 'flex items-center justify-between mb-1' },
+                  h('span', { className: 'text-sm font-medium text-gray-800' }, row.label),
+                  h('span', { className: 'text-sm font-bold text-gray-900' }, row.val + ' / ' + row.max)
+                ),
+                h('div', { className: 'progress-bar' },
+                  h('div', { className: 'progress-fill', style: { width: ((row.val / row.max) * 100) + '%', background: row.color } })
+                ),
+                h('div', { className: 'text-xs text-gray-500 mt-1' }, row.sub)
+              );
+            })
+          )
+        ),
+
+        h('div', { className: 'bg-white rounded-2xl p-5 md:p-6 border border-gray-100 shadow-sm' },
+          h('div', { className: 'flex items-center justify-between mb-4' },
+            h('h3', { className: 'font-bold text-gray-900' }, 'Actividad en vivo'),
+            h('span', { className: 'flex items-center gap-1 text-xs text-green-600 font-medium' },
+              h('span', { className: 'w-2 h-2 rounded-full bg-green-500', style: { animation: 'pulse 2s infinite' } }),
+              'En directo'
+            )
+          ),
+          h('div', { className: 'space-y-3 max-h-96 overflow-y-auto scrollbar-thin pr-2' },
+            notifs.slice().reverse().map(function(n, i) {
+              return h('div', { key: i, className: 'anim-slide border-l-2 border-cercasa-500 pl-3 py-1' },
+                h('div', { className: 'text-sm text-gray-800 leading-snug' }, n.msg),
+                h('div', { className: 'text-xs text-gray-400 mt-0.5 flex items-center gap-2' },
+                  h(Icon, { d: I.clock, size: 12 }),
+                  n.who + ' · ahora mismo'
+                )
+              );
+            })
+          )
+        )
+      ),
+
+      h('div', { className: 'grid md:grid-cols-2 gap-6' },
+        h('div', { className: 'bg-white rounded-2xl p-5 md:p-6 border border-gray-100 shadow-sm' },
+          h('h3', { className: 'font-bold text-gray-900 mb-4' }, 'Top barrios · leads esta semana'),
+          h('div', { className: 'space-y-3' },
+            [
+              { barrio:'Russafa',     leads: 12, val: 100 },
+              { barrio:'L\'Eixample', leads:  9, val:  75 },
+              { barrio:'Benimaclet',  leads:  7, val:  58 },
+              { barrio:'Mestalla',    leads:  6, val:  50 },
+              { barrio:'Patraix',     leads:  4, val:  33 },
+              { barrio:'Godella',     leads:  3, val:  25 },
+            ].map(function(b, i) {
+              return h('div', { key: i, className: 'flex items-center gap-3' },
+                h('div', { className: 'text-sm font-medium text-gray-700 w-28 truncate' }, b.barrio),
+                h('div', { className: 'flex-1 progress-bar' },
+                  h('div', { className: 'progress-fill', style: { width: b.val + '%' } })
+                ),
+                h('div', { className: 'text-sm font-bold text-gray-900 w-8 text-right' }, b.leads)
+              );
+            })
+          )
+        ),
+
+        h('div', { className: 'bg-white rounded-2xl p-5 md:p-6 border border-gray-100 shadow-sm' },
+          h('h3', { className: 'font-bold text-gray-900 mb-4' }, 'BBDD · oro dormido'),
+          h('div', { className: 'flex items-baseline gap-3 mb-3' },
+            h('div', { className: 'text-3xl font-bold text-cercasa-700' }, '180.412'),
+            h('div', { className: 'text-sm text-gray-500' }, 'contactos totales')
+          ),
+          h('div', { className: 'space-y-2 mb-4' },
+            h('div', { className: 'flex items-center justify-between text-sm' },
+              h('span', { className: 'text-gray-600' }, 'Contactados últimos 12 meses'),
+              h('span', { className: 'font-bold text-gray-900' }, '12.847 · 7,1%')
+            ),
+            h('div', { className: 'flex items-center justify-between text-sm' },
+              h('span', { className: 'text-gray-600' }, 'Sin actividad +24 meses'),
+              h('span', { className: 'font-bold text-orange-600' }, '142.318 · 78,9%')
+            ),
+            h('div', { className: 'flex items-center justify-between text-sm' },
+              h('span', { className: 'text-gray-600' }, 'Compradores potenciales activos'),
+              h('span', { className: 'font-bold text-cercasa-600' }, '8.231 · 4,6%')
+            )
+          ),
+          h('div', { className: 'bg-cercasa-50 border border-cercasa-200 rounded-lg p-3 text-xs text-cercasa-800' },
+            h('strong', null, '⚡ Oportunidad: '),
+            'Activar campaña re-engagement IA a los 142.318 contactos dormidos · estimación 850-1.200 oportunidades reactivables en 90 días.'
+          )
+        )
+      )
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · CaptadorView ⭐ ESTRELLA
+  // ─────────────────────────────────────────────────────────────
+  var ESTADOS = ['NUEVO', 'CONTACTADO WhatsApp', 'CONTACTADO TEL', 'CUALIFICADO', 'DESCARTADO BASURA', 'ASIGNADO HUMANO'];
+  var ESTADO_COLORS = {
+    'NUEVO':                { bg:'bg-gray-100',    text:'text-gray-700',    border:'border-gray-300' },
+    'CONTACTADO WhatsApp':  { bg:'bg-green-50',    text:'text-green-700',   border:'border-green-300' },
+    'CONTACTADO TEL':       { bg:'bg-blue-50',     text:'text-blue-700',    border:'border-blue-300' },
+    'CUALIFICADO':          { bg:'bg-cercasa-100', text:'text-cercasa-800', border:'border-cercasa-400' },
+    'DESCARTADO BASURA':    { bg:'bg-red-50',      text:'text-red-700',     border:'border-red-300' },
+    'ASIGNADO HUMANO':      { bg:'bg-amber-50',    text:'text-amber-800',   border:'border-amber-300' },
+  };
+
+  // Conversación WhatsApp María Tortajada
+  var CONVERSACION_MARIA = [
+    { from:'ia',   txt:'Hola María, soy el asistente virtual de Cercasa. Acabo de ver que has dejado tus datos en el anuncio de "Vende tu piso en Valencia". ¿Tienes un par de minutos para que te ayude?', ts:'12:34' },
+    { from:'lead', txt:'Sí, dime', ts:'12:35' },
+    { from:'ia',   txt:'Genial. Para darte una valoración realista necesito 3 datos rápidos. (1) ¿Es un piso en Russafa? (2) Cuántas habitaciones tiene. (3) ¿Por qué quieres venderlo?', ts:'12:35' },
+    { from:'lead', txt:'Russafa sí, 3 hab. Me traslado a Madrid por trabajo y necesito venderlo en 2-3 meses', ts:'12:37' },
+    { from:'ia',   txt:'Perfecto María, eso me ayuda mucho. Russafa 3 hab. con tu plazo de 60-90 días entra en el rango 215.000-240.000 € según estado y planta. ¿Tienes fotos del piso a mano?', ts:'12:37' },
+    { from:'lead', txt:'Sí, te las paso ahora', ts:'12:38' },
+    { from:'ia',   txt:'Genial. Mientras me llegan, te propongo: paso tu caso a Germán Martínez (nuestro comercial de zona Russafa) para que te llame mañana entre 10 y 12h y concretéis visita esta semana. ¿Te va bien?', ts:'12:38' },
+    { from:'lead', txt:'Perfecto, mañana mañana mejor', ts:'12:39' },
+    { from:'ia',   txt:'Hecho. Te confirmaré por aquí en cuanto Germán tenga la franja exacta · normalmente avisa en menos de 1h.', ts:'12:39' },
+  ];
+
+  function PhoneMockup(props) {
+    var msgs = props.msgs;
+    var typing = props.typing;
+    var refScroll = useRef(null);
+    useEffect(function() {
+      if (refScroll.current) refScroll.current.scrollTop = refScroll.current.scrollHeight;
+    }, [msgs.length, typing]);
+    return h('div', { className: 'phone-frame mx-auto desktop-only' },
+      h('div', { className: 'phone-screen' },
+        h('div', { className: 'phone-statusbar' },
+          h('span', null, '11:42'),
+          h('span', null, '📶 100%')
+        ),
+        h('div', { className: 'phone-header' },
+          h('div', { className: 'w-9 h-9 rounded-full bg-white flex items-center justify-center' },
+            h('img', { src: 'https://cercasa.es/images/logo/logo_verde23.svg', alt: 'C', style: { width: 24, height: 24, objectFit: 'contain' } })
+          ),
+          h('div', { className: 'flex-1 min-w-0' },
+            h('div', { className: 'text-sm font-semibold truncate' }, 'Cercasa · Asistente IA'),
+            h('div', { className: 'text-[11px] text-green-100 flex items-center gap-1' },
+              h('span', { className: 'w-1.5 h-1.5 rounded-full bg-green-300 inline-block' }),
+              'en línea'
+            )
+          ),
+          h('div', { className: 'text-white' }, h(Icon, { d: I.phone, size: 16 }))
+        ),
+        h('div', { ref: refScroll, className: 'flex-1 overflow-y-auto whatsapp-bg p-3 flex flex-col gap-2 scrollbar-thin' },
+          msgs.map(function(m, i) {
+            return h('div', { key: i, className: cls('flex flex-col', m.from === 'lead' ? 'items-end' : 'items-start') },
+              h('div', { className: cls('msg-bubble', m.from === 'lead' ? 'msg-out' : 'msg-in') },
+                m.txt,
+                h('div', { className: 'msg-time' }, m.ts, m.from === 'lead' && h('span', { className: 'msg-check' }, '✓✓'))
+              )
+            );
+          }),
+          typing && h('div', { className: 'msg-bubble msg-in', style: { padding: '8px 12px' } },
+            h('span', { className: 'inline-block', style: { animation: 'pulse 1.5s infinite' } }, '● ● ●')
+          )
+        ),
+        h('div', { className: 'bg-white px-3 py-2 flex items-center gap-2 border-t border-gray-200' },
+          h('div', { className: 'flex-1 bg-gray-100 rounded-full px-3 py-1.5 text-xs text-gray-400' }, 'Escribe un mensaje…'),
+          h('div', { className: 'w-8 h-8 rounded-full bg-cercasa-500 flex items-center justify-center text-white' },
+            h(Icon, { d: I.send, size: 14 })
+          )
+        )
+      )
+    );
+  }
+
+  function CaptadorView(props) {
+    var leadsState = useState(LEADS)[0];
+    var setLeadsState = useState(LEADS)[1];
+    // typewriter conversación María
+    var visibleMsgs = useState(CONVERSACION_MARIA.slice(0, 3))[0];
+    var setVisible = useState(CONVERSACION_MARIA.slice(0, 3))[1];
+    var typing = useState(false)[0];
+    var setTyping = useState(false)[1];
+    var [showCadencia, setShowCadencia] = useState(false);
+    var [selectedLead, setSelectedLead] = useState(null);
+    var [dragId, setDragId] = useState(null);
+
+    useEffect(function() {
+      var i = 3;
+      var timer = setInterval(function() {
+        if (i >= CONVERSACION_MARIA.length) { clearInterval(timer); return; }
+        setTyping(true);
+        setTimeout(function() {
+          setTyping(false);
+          setVisible(CONVERSACION_MARIA.slice(0, i + 1));
+          i++;
+        }, 1200);
+      }, 3500);
+      return function() { clearInterval(timer); };
+    }, []);
+
+    function moveLead(id, estado) {
+      setLeadsState(function(arr) {
+        return arr.map(function(l) { return l.id === id ? Object.assign({}, l, { estado: estado }) : l; });
+      });
+    }
+
+    function leadsPorEstado(estado) {
+      return leadsState.filter(function(l) { return l.estado === estado; });
+    }
+
+    return h('div', { className: 'p-5 md:p-8 space-y-6 max-w-[1600px] mx-auto' },
+      h('div', { className: 'flex items-start justify-between flex-wrap gap-3' },
+        h('div', null,
+          h('h2', { className: 'text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2' },
+            h('span', { className: 'text-cercasa-600' }, h(Icon, { d: I.target, size: 24 })),
+            'Captador IA · pipeline de leads venta'
+          ),
+          h('p', { className: 'text-sm text-gray-500 mt-1' },
+            'Comercial IA #1 · ataca el ', h('strong', null, 'dolor de los leads basura'), '. Cada lead entrante recibe WhatsApp instantáneo de la IA, que razona con sus respuestas y decide automáticamente si escalar a Germán/Román o descartar.'
+          )
+        ),
+        h('button', {
+          onClick: function() { setShowCadencia(true); },
+          className: 'bg-cercasa-500 hover:bg-cercasa-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition-colors',
+        },
+          h(Icon, { d: I.play, size: 16 }),
+          'Reproducir cadencia multicanal'
+        )
+      ),
+
+      h('div', { className: 'grid lg:grid-cols-3 gap-6' },
+        h('div', { className: 'lg:col-span-2 space-y-4' },
+          h('div', { className: 'bg-white rounded-2xl p-4 md:p-5 border border-gray-100 shadow-sm' },
+            h('div', { className: 'flex items-center justify-between mb-3 flex-wrap gap-2' },
+              h('h3', { className: 'font-bold text-gray-900' }, 'Pipeline en vivo · arrastra entre columnas'),
+              h('div', { className: 'flex items-center gap-2 text-xs text-gray-500' },
+                h('span', { className: 'flex items-center gap-1' }, h('span', { className: 'w-2 h-2 rounded-full bg-green-500', style: { animation: 'pulse 2s infinite' } }), 'IA procesando'),
+                '·',
+                h('span', null, leadsState.length + ' leads activos')
+              )
+            ),
+            h('div', { className: 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 min-h-[460px]' },
+              ESTADOS.map(function(estado) {
+                var color = ESTADO_COLORS[estado];
+                var leads = leadsPorEstado(estado);
+                return h('div', {
+                  key: estado,
+                  className: cls('pipe-col flex flex-col rounded-lg border-2 border-dashed', color.border, 'bg-gray-50 p-2'),
+                  onDragOver: function(e) { e.preventDefault(); e.currentTarget.classList.add('dragover'); },
+                  onDragLeave: function(e) { e.currentTarget.classList.remove('dragover'); },
+                  onDrop: function(e) {
+                    e.preventDefault();
+                    e.currentTarget.classList.remove('dragover');
+                    if (dragId) { moveLead(dragId, estado); setDragId(null); }
+                  },
+                },
+                  h('div', { className: cls('text-[10px] uppercase tracking-wider font-bold px-1 py-0.5 mb-2 flex items-center justify-between', color.text) },
+                    h('span', { className: 'truncate' }, estado),
+                    h('span', { className: cls('text-[10px] font-bold px-1.5 py-0.5 rounded-full', color.bg) }, leads.length)
+                  ),
+                  h('div', { className: 'space-y-2 flex-1' },
+                    leads.map(function(l) {
+                      var asign = l.asignado ? USERS.filter(function(u){return u.id === l.asignado;})[0] : null;
+                      return h('div', {
+                        key: l.id,
+                        draggable: true,
+                        onDragStart: function(){ setDragId(l.id); },
+                        onClick: function() { setSelectedLead(l); },
+                        className: 'pipe-card bg-white rounded-lg p-2 border border-gray-200 shadow-sm text-xs',
+                      },
+                        h('div', { className: 'font-semibold text-gray-900 truncate' }, l.nombre),
+                        h('div', { className: 'text-[10px] text-gray-500 truncate' }, l.zona + ' · ' + l.tipo),
+                        l.precio && h('div', { className: 'text-[11px] font-bold text-cercasa-700 mt-0.5' }, eur(l.precio)),
+                        h('div', { className: 'flex items-center justify-between mt-1.5' },
+                          l.score !== null ? h('div', {
+                            className: cls(
+                              'text-[10px] font-bold px-1.5 py-0.5 rounded',
+                              l.score >= 80 ? 'bg-green-100 text-green-700' :
+                              l.score >= 60 ? 'bg-amber-100 text-amber-700' :
+                              l.score >= 40 ? 'bg-orange-100 text-orange-700' :
+                              'bg-red-100 text-red-700'
+                            )
+                          }, 'IA · ' + l.score) : h('div', { className: 'text-[10px] text-gray-400' }, 'pendiente IA'),
+                          asign && h(Avatar, { user: asign, size: 18 })
+                        ),
+                        h('div', { className: 'text-[9px] text-gray-400 mt-0.5' }, l.ts)
+                      );
+                    })
+                  )
+                );
+              })
+            )
+          ),
+
+          h('div', { className: 'bg-white rounded-2xl p-4 md:p-5 border border-gray-100 shadow-sm' },
+            h('h3', { className: 'font-bold text-gray-900 mb-3 flex items-center gap-2' },
+              h('span', { className: 'text-cercasa-600' }, h(Icon, { d: I.sparkles, size: 18 })),
+              'Cómo razona la IA · ejemplo lead María Tortajada'
+            ),
+            h('div', { className: 'grid md:grid-cols-3 gap-3 text-xs' },
+              [
+                { titulo:'1. Detecta contexto', txt:'IA lee formulario (Russafa · piso 3 hab · "traslado") · cruza con BBDD y mercado · entiende que es venta con plazo definido.' },
+                { titulo:'2. Conversación que razona', txt:'No pregunta 10 cosas seguidas. Saca 3 datos clave en 4 turnos · ajusta tono al ritmo del lead. Si responde corto, se adapta.' },
+                { titulo:'3. Decide y escala', txt:'Score 88/100. Asigna a Germán (zona Russafa) con propuesta de franja horaria. Notifica al móvil de Germán. Tiempo total: 4 min 38s.' },
+              ].map(function(c, i) {
+                return h('div', { key: i, className: 'bg-cercasa-50 rounded-lg p-3 border border-cercasa-100' },
+                  h('div', { className: 'font-bold text-cercasa-800 mb-1' }, c.titulo),
+                  h('div', { className: 'text-cercasa-700 leading-snug' }, c.txt)
+                );
+              })
+            )
+          )
+        ),
+
+        h('div', { className: 'space-y-4' },
+          h('div', { className: 'text-center mb-2 desktop-only' },
+            h('div', { className: 'text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2' }, 'Vista paralela · lo que ve la lead'),
+            h('div', { className: 'text-[11px] text-gray-400 mb-3' }, 'WhatsApp en directo · María Tortajada · +34 612 84 23 11')
+          ),
+          h(PhoneMockup, { msgs: visibleMsgs, typing: typing }),
+
+          h('div', { className: 'bg-white rounded-2xl p-4 border border-gray-100 shadow-sm md:hidden' },
+            h('div', { className: 'text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3' }, 'Conversación IA ↔ lead'),
+            h('div', { className: 'space-y-2 max-h-96 overflow-y-auto scrollbar-thin' },
+              visibleMsgs.map(function(m, i) {
+                return h('div', { key: i, className: cls('rounded-lg p-2 text-sm', m.from === 'lead' ? 'bg-cercasa-100 ml-6' : 'bg-gray-100 mr-6') },
+                  h('div', { className: 'text-[10px] font-bold uppercase mb-0.5 text-gray-500' }, m.from === 'lead' ? 'María' : 'IA Cercasa'),
+                  m.txt
+                );
+              })
+            )
+          )
+        )
+      ),
+
+      showCadencia && h(CadenciaModal, { onClose: function() { setShowCadencia(false); } }),
+      selectedLead && h(LeadDetailModal, { lead: selectedLead, onClose: function() { setSelectedLead(null); } })
+    );
+  }
+
+  function CadenciaModal(props) {
+    var pasos = [
+      { t:'T+0',       canal:'WhatsApp instantáneo', desc:'Mensaje de cualificación que razona con el contexto del formulario. Llega en &lt; 90 segundos desde que el lead lo deja.', icon: I.whatsapp, color:'#25D366' },
+      { t:'T+1h',      canal:'Llamada IA',           desc:'Si no respondió WhatsApp en 1h y es horario laboral (L-V 9:30-14 / 17-20 · S 10-14), la IA llama. Voz natural en castellano. Si descuelga, conversación. Si no, mensaje de voz.', icon: I.phone,    color:'#3B82F6' },
+      { t:'T+24h',     canal:'Email personalizado',  desc:'Si no respondió ni WhatsApp ni teléfono en 24h, email con plantilla generada IA según contexto (zona, tipo, motivo declarado).', icon: I.mail,     color:'#A855F7' },
+      { t:'T+72h',     canal:'Recontacto WhatsApp',  desc:'Si sigue sin responder, recontacto WhatsApp con ángulo distinto al del primer mensaje. Si tampoco, lead pasa a "DESCARTADO BASURA".', icon: I.whatsapp, color:'#F59E0B' },
+    ];
+    return h('div', {
+      className: 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4',
+      onClick: props.onClose,
+    },
+      h('div', {
+        className: 'bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 md:p-8 anim-pop max-h-[90vh] overflow-y-auto scrollbar-thin',
+        onClick: function(e) { e.stopPropagation(); },
+      },
+        h('div', { className: 'flex items-start justify-between mb-4' },
+          h('div', null,
+            h('h3', { className: 'text-xl font-bold text-gray-900' }, 'Cadencia multicanal · cómo trabaja el Comercial IA'),
+            h('p', { className: 'text-sm text-gray-500 mt-1' }, 'Como lo haría un comercial humano bueno · sin que Germán o Román dediquen horas')
+          ),
+          h('button', {
+            onClick: props.onClose,
+            className: 'p-2 hover:bg-gray-100 rounded-lg text-gray-500',
+          }, h(Icon, { d: I.x, size: 18 }))
+        ),
+        h('div', { className: 'space-y-3' },
+          pasos.map(function(p, i) {
+            return h('div', { key: i, className: 'flex gap-4 anim-fade', style: { animationDelay: (i * 0.1) + 's' } },
+              h('div', { className: 'flex flex-col items-center' },
+                h('div', {
+                  style: { background: p.color },
+                  className: 'w-12 h-12 rounded-full text-white flex items-center justify-center font-bold text-sm shadow-md',
+                }, h(Icon, { d: p.icon, size: 22 })),
+                i < pasos.length - 1 && h('div', { className: 'w-0.5 flex-1 bg-gray-200 my-1' })
+              ),
+              h('div', { className: 'flex-1 pb-4' },
+                h('div', { className: 'flex items-center gap-2 mb-1' },
+                  h('span', { className: 'text-xs font-bold uppercase tracking-wide text-cercasa-700 bg-cercasa-100 px-2 py-0.5 rounded' }, p.t),
+                  h('span', { className: 'font-semibold text-gray-900' }, p.canal)
+                ),
+                h('p', { className: 'text-sm text-gray-600 leading-snug', dangerouslySetInnerHTML: { __html: p.desc } })
+              )
+            );
+          })
+        ),
+        h('div', { className: 'mt-5 p-4 rounded-xl bg-cercasa-50 border border-cercasa-200 text-sm text-cercasa-800' },
+          h('strong', null, 'El diferencial: '),
+          'la IA razona con el lead, no decide con keywords. Si el lead dice "estoy en el coche, llámame en 1h", la IA lo agenda y respeta. Si dice "ya lo vendí", marca y archiva. Si dice "no me interesa pero conozco a alguien", abre una conversación nueva.'
+        )
+      )
+    );
+  }
+
+  function LeadDetailModal(props) {
+    var l = props.lead;
+    var asign = l.asignado ? USERS.filter(function(u){return u.id === l.asignado;})[0] : null;
+    return h('div', {
+      className: 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4',
+      onClick: props.onClose,
+    },
+      h('div', {
+        className: 'bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 anim-pop',
+        onClick: function(e) { e.stopPropagation(); },
+      },
+        h('div', { className: 'flex items-start justify-between mb-4' },
+          h('div', null,
+            h('h3', { className: 'text-lg font-bold text-gray-900' }, l.nombre),
+            h('p', { className: 'text-sm text-gray-500' }, l.tel + ' · ' + l.fuente)
+          ),
+          h('button', { onClick: props.onClose, className: 'p-2 hover:bg-gray-100 rounded-lg' }, h(Icon, { d: I.x, size: 18 }))
+        ),
+        h('div', { className: 'space-y-3 text-sm' },
+          h('div', { className: 'grid grid-cols-2 gap-3' },
+            h('div', null, h('div', { className: 'text-xs text-gray-500' }, 'Zona'), h('div', { className: 'font-semibold' }, l.zona)),
+            h('div', null, h('div', { className: 'text-xs text-gray-500' }, 'Tipo'), h('div', { className: 'font-semibold' }, l.tipo))
+          ),
+          l.precio && h('div', null, h('div', { className: 'text-xs text-gray-500' }, 'Precio orientativo IA'), h('div', { className: 'font-bold text-cercasa-700 text-lg' }, eur(l.precio))),
+          h('div', null, h('div', { className: 'text-xs text-gray-500' }, 'Motivo declarado'), h('div', { className: 'font-semibold' }, l.motivo)),
+          l.score !== null && h('div', null,
+            h('div', { className: 'text-xs text-gray-500 mb-1' }, 'Score IA · razones'),
+            h('div', { className: cls(
+              'text-xl font-bold mb-1',
+              l.score >= 80 ? 'text-green-700' : l.score >= 60 ? 'text-amber-700' : 'text-red-700'
+            )}, l.score + ' / 100'),
+            h('div', { className: 'text-xs text-gray-600 italic bg-gray-50 rounded-lg p-3 leading-snug' }, l.notasIA)
+          ),
+          asign && h('div', { className: 'flex items-center gap-3 pt-3 border-t border-gray-100' },
+            h(Avatar, { user: asign, size: 32 }),
+            h('div', null,
+              h('div', { className: 'text-xs text-gray-500' }, 'Asignado a'),
+              h('div', { className: 'font-semibold' }, asign.firstName + ' ' + asign.lastName)
+            )
+          )
+        )
+      )
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · AlquileresView
+  // ─────────────────────────────────────────────────────────────
+  function AlquileresView(props) {
+    var [filtro, setFiltro] = useState('todos'); // todos | criticos | urgentes | proximos | estables
+    var [query, setQuery] = useState('');
+    var [barrioFiltro, setBarrioFiltro] = useState('todos');
+
+    var barrios = useMemo(function(){
+      var s = {};
+      ALQUILERES.forEach(function(a){ s[a.barrio] = true; });
+      return Object.keys(s).sort();
+    }, []);
+
+    var filtered = ALQUILERES.filter(function(a) {
+      var dias = diasHasta(a.fin);
+      if (filtro === 'criticos' && dias > 30) return false;
+      if (filtro === 'urgentes' && (dias <= 30 || dias > 90)) return false;
+      if (filtro === 'proximos' && (dias <= 90 || dias > 180)) return false;
+      if (filtro === 'estables' && dias <= 180) return false;
+      if (query && !(a.dir.toLowerCase().includes(query.toLowerCase()) || a.inquilino.toLowerCase().includes(query.toLowerCase()) || a.propietario.toLowerCase().includes(query.toLowerCase()))) return false;
+      if (barrioFiltro !== 'todos' && a.barrio !== barrioFiltro) return false;
+      return true;
+    }).sort(function(a, b) { return diasHasta(a.fin) - diasHasta(b.fin); });
+
+    var counts = {
+      todos: ALQUILERES.length,
+      criticos: ALQUILERES.filter(function(a){ return diasHasta(a.fin) <= 30; }).length,
+      urgentes: ALQUILERES.filter(function(a){ var d = diasHasta(a.fin); return d > 30 && d <= 90; }).length,
+      proximos: ALQUILERES.filter(function(a){ var d = diasHasta(a.fin); return d > 90 && d <= 180; }).length,
+      estables: ALQUILERES.filter(function(a){ return diasHasta(a.fin) > 180; }).length,
+    };
+
+    return h('div', { className: 'p-5 md:p-8 space-y-5 max-w-[1600px] mx-auto' },
+      h('div', null,
+        h('h2', { className: 'text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2' },
+          h('span', { className: 'text-cercasa-700' }, h(Icon, { d: I.key, size: 24 })),
+          'Alquileres activos'
+        ),
+        h('p', { className: 'text-sm text-gray-500 mt-1' },
+          'Cartera Cercasa · ', h('strong', null, '2.014 alquileres activos'), '. Cada contrato con badge según días para vencimiento · alerta a T-90 días activa Agente IA Renovación.'
+        )
+      ),
+
+      h('div', { className: 'grid grid-cols-2 md:grid-cols-5 gap-3' },
+        [
+          { id:'todos',    label:'Todos',                   count: counts.todos,    dot:'bg-gray-400' },
+          { id:'criticos', label:'Críticos · ≤30 días',     count: counts.criticos, dot:'bg-red-500' },
+          { id:'urgentes', label:'Urgentes · 31-90 días',   count: counts.urgentes, dot:'bg-orange-500' },
+          { id:'proximos', label:'Próximos · 91-180 días',  count: counts.proximos, dot:'bg-amber-500' },
+          { id:'estables', label:'Estables · >180 días',    count: counts.estables, dot:'bg-green-500' },
+        ].map(function(f) {
+          return h('button', {
+            key: f.id,
+            onClick: function() { setFiltro(f.id); },
+            className: cls(
+              'flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all',
+              filtro === f.id ? 'border-cercasa-500 bg-cercasa-50' : 'border-gray-200 bg-white hover:border-gray-300'
+            ),
+          },
+            h('span', { className: cls('w-2.5 h-2.5 rounded-full inline-block', f.dot) }),
+            h('div', { className: 'text-left flex-1' },
+              h('div', { className: 'text-xs text-gray-500 font-medium' }, f.label),
+              h('div', { className: 'font-bold text-gray-900' }, f.count)
+            )
+          );
+        })
+      ),
+
+      h('div', { className: 'flex gap-3 flex-wrap' },
+        h('div', { className: 'flex-1 min-w-[200px] relative' },
+          h('span', { className: 'absolute left-3 top-1/2 -translate-y-1/2 text-gray-400' }, h(Icon, { d: I.search, size: 16 })),
+          h('input', {
+            type: 'text',
+            value: query,
+            onChange: function(e) { setQuery(e.target.value); },
+            placeholder: 'Buscar por dirección, inquilino o propietario…',
+            className: 'w-full pl-10 pr-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-cercasa-500',
+          })
+        ),
+        h('select', {
+          value: barrioFiltro,
+          onChange: function(e) { setBarrioFiltro(e.target.value); },
+          className: 'px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white focus:outline-none focus:border-cercasa-500',
+        },
+          h('option', { value: 'todos' }, 'Todos los barrios / municipios'),
+          barrios.map(function(b) { return h('option', { key: b, value: b }, b); })
+        )
+      ),
+
+      h('div', { className: 'bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden' },
+        h('div', { className: 'overflow-x-auto' },
+          h('table', { className: 'w-full text-sm' },
+            h('thead', { className: 'bg-gray-50 border-b border-gray-200' },
+              h('tr', null,
+                h('th', { className: 'text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-gray-600' }, 'Dirección'),
+                h('th', { className: 'text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-gray-600' }, 'Inquilino'),
+                h('th', { className: 'text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-gray-600 hidden md:table-cell' }, 'Propietario'),
+                h('th', { className: 'text-right px-4 py-3 font-semibold text-xs uppercase tracking-wider text-gray-600' }, 'Renta'),
+                h('th', { className: 'text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-gray-600' }, 'Vencimiento'),
+                h('th', { className: 'text-right px-4 py-3 font-semibold text-xs uppercase tracking-wider text-gray-600' }, 'Acción')
+              )
+            ),
+            h('tbody', null,
+              filtered.length === 0 ?
+                h('tr', null, h('td', { colSpan: 6, className: 'text-center text-gray-400 py-12' },
+                  'Sin alquileres con esos filtros. Prueba a cambiar barrio o estado.'
+                )) :
+                filtered.map(function(a) {
+                  var dias = diasHasta(a.fin);
+                  var c = colorVencimiento(dias);
+                  return h('tr', { key: a.id, className: 'border-b border-gray-100 hover:bg-gray-50 transition-colors' },
+                    h('td', { className: 'px-4 py-3' },
+                      h('div', { className: 'font-semibold text-gray-900' }, a.dir),
+                      h('div', { className: 'text-xs text-gray-500' }, a.barrio + ' · ' + a.m2 + ' m² · ' + a.hab + ' hab' + (a.tipo === 'local' ? ' · LOCAL' : a.tipo === 'casa' ? ' · CASA' : ''))
+                    ),
+                    h('td', { className: 'px-4 py-3' },
+                      h('div', { className: cls('font-medium', a.vipInquilino ? 'text-cercasa-700 flex items-center gap-1' : 'text-gray-800') },
+                        a.inquilino,
+                        a.vipInquilino && h('span', { className: 'tooltip' }, h(Icon, { d: I.star, size: 12 }), h('span', { className: 'tooltip-content' }, 'VIP · candidato compra'))
+                      ),
+                      h('div', { className: 'text-xs text-gray-500' }, a.anyos + ' años pagando puntual · llamado: ' + a.llamado)
+                    ),
+                    h('td', { className: 'px-4 py-3 hidden md:table-cell text-gray-700' }, a.propietario),
+                    h('td', { className: 'px-4 py-3 text-right font-semibold text-gray-900' }, eur(a.renta) + '/mes'),
+                    h('td', { className: 'px-4 py-3' },
+                      h('div', { className: cls('inline-flex items-center gap-2 px-2 py-1 rounded text-xs font-bold', c.bg, c.text) },
+                        h('span', { className: cls('w-2 h-2 rounded-full', c.dot) }),
+                        dias > 0 ? dias + ' días' : 'vencido'
+                      ),
+                      h('div', { className: 'text-[10px] text-gray-400 mt-1' }, fmtFecha(a.fin))
+                    ),
+                    h('td', { className: 'px-4 py-3 text-right' },
+                      dias <= 90 ?
+                        h('button', {
+                          onClick: function() { props.setView('renovacion'); },
+                          className: 'bg-cercasa-500 hover:bg-cercasa-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1 ml-auto transition-colors',
+                        },
+                          h(Icon, { d: I.cpu, size: 12 }),
+                          'Activar Agente IA'
+                        ) :
+                        h('button', {
+                          className: 'text-gray-400 text-xs px-3 py-1.5 rounded-lg hover:bg-gray-100',
+                        }, 'Ver ficha')
+                    )
+                  );
+                })
+            )
+          )
+        ),
+        h('div', { className: 'px-4 py-3 border-t border-gray-100 text-xs text-gray-500 bg-gray-50 flex items-center justify-between' },
+          h('span', null, 'Mostrando ', h('strong', null, filtered.length), ' de ', h('strong', null, ALQUILERES.length), ' alquileres'),
+          h('span', null, 'Datos sintéticos de la demo · cartera real Cercasa: 2.014')
+        )
+      )
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · RenovacionView
+  // ─────────────────────────────────────────────────────────────
+  var CONVERSACION_LAURA = [
+    { from:'ia',   txt:'Hola Laura, soy el asistente virtual de Cercasa. Hablo de parte de Patricia, tu comercial habitual. Tu contrato de Av. Primado Reig 48 termina el 22 de agosto · ¿tienes 2 minutos?', ts:'10:14' },
+    { from:'lead', txt:'Hola, sí, dime', ts:'10:15' },
+    { from:'ia',   txt:'Llevas 3 años en el piso y nunca te has retrasado en el pago · gracias Laura. La propietaria nos ha pedido sondear opciones para cuando termine el contrato. ¿Estás pensando en renovar?', ts:'10:15' },
+    { from:'lead', txt:'Pues la verdad estamos a vueltas. La renta sube cada año y nos planteamos si comprar tendría más sentido', ts:'10:17' },
+    { from:'ia',   txt:'Te entiendo perfectamente · es muy común a los 3-4 años. Te cuento dos cosas que igual no sabías y que podrían darte la decisión:', ts:'10:17' },
+    { from:'ia',   txt:'(1) Por ley tienes derecho de tanteo · puedes comprar el piso antes que cualquier comprador externo si la propietaria decide vender. (2) Pagando 920 €/mes de alquiler, una hipoteca a 25 años para este piso saldría a 740-820 €/mes según condiciones.', ts:'10:18' },
+    { from:'lead', txt:'No tenía ni idea de lo del tanteo. ¿Y cuánto pediría la propietaria?', ts:'10:19' },
+    { from:'ia',   txt:'La valoración orientativa que tenemos es de 218.000 €. ¿Te parece si quedo con Carlos (nuestro asesor financiero) para que os hagáis simulación realista de cuota mañana mismo · 30 min sin compromiso?', ts:'10:20' },
+    { from:'lead', txt:'Vale, mañana por la tarde mejor', ts:'10:21' },
+    { from:'ia',   txt:'Genial Laura · te confirmo en menos de 1h la franja exacta con Carlos. Y aviso a Patricia para que sepa que estamos avanzando. 🏡', ts:'10:21' },
+  ];
+
+  function RenovacionView() {
+    var [visible, setVisible] = useState(CONVERSACION_LAURA.slice(0, 3));
+    var [typing, setTyping] = useState(false);
+    var [escenario, setEscenario] = useState('si'); // si | no | duda
+
+    useEffect(function() {
+      var i = 3;
+      var timer = setInterval(function() {
+        if (i >= CONVERSACION_LAURA.length) { clearInterval(timer); return; }
+        setTyping(true);
+        setTimeout(function() {
+          setTyping(false);
+          setVisible(CONVERSACION_LAURA.slice(0, i + 1));
+          i++;
+        }, 1500);
+      }, 4500);
+      return function() { clearInterval(timer); };
+    }, []);
+
+    var caso = ALQUILERES[0]; // A001 Laura Sanchis
+    var diasFin = diasHasta(caso.fin);
+
+    return h('div', { className: 'p-5 md:p-8 space-y-6 max-w-[1600px] mx-auto' },
+      h('div', null,
+        h('h2', { className: 'text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2' },
+          h('span', { className: 'text-cercasa-600' }, h(Icon, { d: I.refresh, size: 24 })),
+          'Agente IA Renovación · venta al inquilino'
+        ),
+        h('p', { className: 'text-sm text-gray-500 mt-1 max-w-3xl' },
+          'Comercial IA #2 · ataca el ', h('strong', null, 'dolor de "los comerciales no saben cerrar la venta al inquilino al vencimiento"'), '. A T-90 días del fin de contrato, la IA sondea al inquilino y, según respuesta, propone visita financiera, ofrece renovación con revisión o escala a Patricia/Liliana.'
+        )
+      ),
+
+      h('div', { className: 'grid lg:grid-cols-3 gap-6' },
+        h('div', { className: 'lg:col-span-2 space-y-5' },
+          h('div', { className: 'bg-white rounded-2xl p-5 border border-gray-100 shadow-sm' },
+            h('div', { className: 'flex items-start justify-between flex-wrap gap-3 mb-4' },
+              h('div', null,
+                h('div', { className: 'text-xs font-semibold text-gray-500 uppercase tracking-wide' }, 'Caso activo en demo'),
+                h('div', { className: 'text-lg font-bold text-gray-900 mt-1' }, caso.dir),
+                h('div', { className: 'text-sm text-gray-500' }, caso.barrio + ' · ' + caso.m2 + ' m² · ' + caso.hab + ' hab')
+              ),
+              h('div', { className: 'text-right' },
+                h('div', { className: cls('inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold', colorVencimiento(diasFin).bg, colorVencimiento(diasFin).text) },
+                  h(Icon, { d: I.clock, size: 12 }),
+                  'Vence en ' + diasFin + ' días'
+                ),
+                h('div', { className: 'text-xs text-gray-400 mt-1' }, fmtFecha(caso.fin))
+              )
+            ),
+            h('div', { className: 'grid md:grid-cols-3 gap-3 text-sm' },
+              h('div', { className: 'bg-cercasa-50 rounded-lg p-3 border border-cercasa-100' },
+                h('div', { className: 'text-xs text-cercasa-700 font-semibold uppercase' }, 'Inquilina'),
+                h('div', { className: 'font-bold text-cercasa-900' }, caso.inquilino),
+                h('div', { className: 'text-xs text-cercasa-700 mt-1' }, caso.anyos + ' años · pago puntual · VIP candidata compra')
+              ),
+              h('div', { className: 'bg-gray-50 rounded-lg p-3 border border-gray-200' },
+                h('div', { className: 'text-xs text-gray-500 font-semibold uppercase' }, 'Propietaria'),
+                h('div', { className: 'font-bold text-gray-800' }, caso.propietario),
+                h('div', { className: 'text-xs text-gray-500 mt-1' }, 'Considera vender · sondeo activo')
+              ),
+              h('div', { className: 'bg-amber-50 rounded-lg p-3 border border-amber-200' },
+                h('div', { className: 'text-xs text-amber-700 font-semibold uppercase' }, 'Valoración orientativa'),
+                h('div', { className: 'font-bold text-amber-900' }, eur(218000)),
+                h('div', { className: 'text-xs text-amber-700 mt-1' }, 'Cuota hipoteca estimada · 740-820 €/mes')
+              )
+            )
+          ),
+
+          h('div', { className: 'bg-white rounded-2xl p-5 border border-gray-100 shadow-sm' },
+            h('div', { className: 'flex items-center justify-between mb-4' },
+              h('h3', { className: 'font-bold text-gray-900' }, 'Cómo razona la IA según la respuesta del inquilino'),
+              h('div', { className: 'flex gap-1' },
+                [{ id:'si', l:'SÍ interesada', c:'bg-green-100 text-green-700' },
+                 { id:'duda', l:'Tiene dudas', c:'bg-amber-100 text-amber-700' },
+                 { id:'no', l:'NO interesada', c:'bg-red-100 text-red-700' }].map(function(e) {
+                  return h('button', {
+                    key: e.id,
+                    onClick: function() { setEscenario(e.id); },
+                    className: cls('text-xs px-3 py-1.5 rounded-full font-semibold transition-all',
+                      escenario === e.id ? e.c + ' ring-2 ring-offset-1 ring-cercasa-500' : 'text-gray-500 hover:bg-gray-100'),
+                  }, e.l);
+                })
+              )
+            ),
+            escenario === 'si' && h('div', { className: 'anim-fade space-y-3' },
+              h('div', { className: 'flex gap-3 items-start' },
+                h('div', { className: 'w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0' }, h(Icon, { d: I.check, size: 16 })),
+                h('div', null,
+                  h('div', { className: 'font-semibold text-gray-900' }, '1. IA agenda visita con Carlos (financiero)'),
+                  h('div', { className: 'text-sm text-gray-600' }, 'Bloquea franja en agenda de Carlos · envía confirmación a inquilino · notifica a Patricia (comercial habitual) por interno.')
+                )
+              ),
+              h('div', { className: 'flex gap-3 items-start' },
+                h('div', { className: 'w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0' }, h(Icon, { d: I.check, size: 16 })),
+                h('div', null,
+                  h('div', { className: 'font-semibold text-gray-900' }, '2. Simulación hipoteca pre-generada'),
+                  h('div', { className: 'text-sm text-gray-600' }, 'IA prepara borrador de simulación con 3 escenarios (10% / 20% / 30% entrada) y la deja en la ficha para Carlos · ahorra 30 min de prep.')
+                )
+              ),
+              h('div', { className: 'flex gap-3 items-start' },
+                h('div', { className: 'w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0' }, h(Icon, { d: I.check, size: 16 })),
+                h('div', null,
+                  h('div', { className: 'font-semibold text-gray-900' }, '3. Alerta a Ventas (Germán/Román)'),
+                  h('div', { className: 'text-sm text-gray-600' }, 'Si la operación pasa de visita financiera a oferta, departamento Ventas entra para llevar la compraventa. Comisión doble (Alquileres + Ventas) atribuida.')
+                )
+              )
+            ),
+            escenario === 'duda' && h('div', { className: 'anim-fade space-y-3' },
+              h('div', { className: 'flex gap-3 items-start' },
+                h('div', { className: 'w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center flex-shrink-0' }, h(Icon, { d: I.eye, size: 16 })),
+                h('div', null,
+                  h('div', { className: 'font-semibold text-gray-900' }, '1. IA envía recursos sin presionar'),
+                  h('div', { className: 'text-sm text-gray-600' }, 'Mini-explicación derecho tanteo + simulador online + 2 testimonios de inquilinos Cercasa que compraron. Tiempo de digestión 3-5 días.')
+                )
+              ),
+              h('div', { className: 'flex gap-3 items-start' },
+                h('div', { className: 'w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center flex-shrink-0' }, h(Icon, { d: I.eye, size: 16 })),
+                h('div', null,
+                  h('div', { className: 'font-semibold text-gray-900' }, '2. Re-sondeo a los 7 días'),
+                  h('div', { className: 'text-sm text-gray-600' }, 'IA vuelve por WhatsApp con tono nuevo · "qué te ha parecido lo que mandé · te ayuda en algo concreto?" · si sigue indecisa, ofrece renovación de seguro mientras decide.')
+                )
+              )
+            ),
+            escenario === 'no' && h('div', { className: 'anim-fade space-y-3' },
+              h('div', { className: 'flex gap-3 items-start' },
+                h('div', { className: 'w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center flex-shrink-0' }, h(Icon, { d: I.x, size: 16 })),
+                h('div', null,
+                  h('div', { className: 'font-semibold text-gray-900' }, '1. IA ofrece renovación con revisión'),
+                  h('div', { className: 'text-sm text-gray-600' }, 'Propone renovación 12 meses con cláusula revisión IPC + mejora menor (pintura/electrodomestico) · cierra inquilino fiel un año más.')
+                )
+              ),
+              h('div', { className: 'flex gap-3 items-start' },
+                h('div', { className: 'w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center flex-shrink-0' }, h(Icon, { d: I.x, size: 16 })),
+                h('div', null,
+                  h('div', { className: 'font-semibold text-gray-900' }, '2. Sondeo paralelo al propietario'),
+                  h('div', { className: 'text-sm text-gray-600' }, 'Si Laura cierra renovación, propietaria mantiene rentabilidad. Si Laura confirma que se va, IA activa proceso captación inquilino nuevo +30 días antes del vencimiento.')
+                )
+              )
+            )
+          )
+        ),
+
+        h('div', { className: 'space-y-4' },
+          h('div', { className: 'text-center mb-2 desktop-only' },
+            h('div', { className: 'text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2' }, 'Conversación en vivo'),
+            h('div', { className: 'text-[11px] text-gray-400 mb-3' }, 'WhatsApp · Laura Sanchis (inquilina)')
+          ),
+          h(PhoneMockup, { msgs: visible, typing: typing })
+        )
+      )
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · AsistenteView
+  // ─────────────────────────────────────────────────────────────
+  var PRESETS = [
+    {
+      id: 'venciendo',
+      label: 'Alquileres venciendo en los próximos 90 días',
+      icon: I.alert,
+      respuesta: 'Tienes 18 alquileres venciendo en los próximos 90 días:\n\n· 4 CRÍTICOS (≤30 días) — IA ya inició sondeo en 3 de ellos. El cuarto (C/ Cirilo Amorós 90, María Llinares) no ha contestado · te lo escalo a Patricia hoy mismo.\n\n· 6 URGENTES (31-90 días) — IA cierra primera ronda de sondeo entre hoy y el viernes. 2 tienen perfil VIP (3+ años, pago puntual, sin incidencias) · candidatos compra fuertes.\n\n· 8 PRÓXIMOS (91-180 días) — entran en cola IA la semana del 8 de junio.\n\nPropuesta: bloquear 30 min mañana con Patricia y Liliana para revisar conmigo los 4 críticos uno por uno.',
+    },
+    {
+      id: 'leads',
+      label: 'Leads Meta Ads cualificados esta semana',
+      icon: I.target,
+      respuesta: '47 leads esta semana · 32% cualificados (15) · 6% basura descartados (3) · 62% en proceso (29).\n\nTop 5 cualificados pendientes de asignar:\n\n1. María Tortajada Ferrer · Russafa 220k · score 88 · ASIGNADA Germán\n2. Pedro Catalá Soler · Local Patraix 350k · score 91 · ASIGNADO Germán (URGENTE)\n3. Inversiones Hispania SL · Edificio Russafa 1.8M · score 96 · ASIGNADO César\n4. José Llinares Beneyto · Benimaclet 165k · score 82 · ASIGNADO Román\n5. Luis Marí Bayarri · Campanar 295k · score 71 · ASIGNADO Román\n\n¿Quieres que Roxxana suba ya estos 5 a portales con prioridad? Te genero los anuncios.',
+    },
+    {
+      id: 'vip',
+      label: 'Inquilinos con potencial de compra',
+      icon: I.star,
+      respuesta: 'Detecté 12 inquilinos con perfil VIP candidato a compra (≥3 años en piso + pago puntual + estabilidad declarada):\n\n· Laura Sanchis · Av. Primado Reig 48 · 3 años · Patricia · YA en proceso\n· Andrea Sancho · Reina Doña Germana 5 · 2 años · Patricia · alta probabilidad\n· Familia Catalá · Pl. Cánovas 4 · 3 años · sin contactar · activa sondeo IA\n· Familia Llinares · Godella Campo Olivar 12 · 2 años · sin contactar · alta probabilidad\n\nValor potencial agregado: 1.230.000 €. Comisión estimada Cercasa (3% promedio): 36.900 €.\n\n¿Activamos sondeo IA en los 8 que aún están sin contactar?',
+    },
+    {
+      id: 'valoracion',
+      label: 'Generar valoración orientativa de un inmueble',
+      icon: I.euro,
+      respuesta: 'Cuéntame el inmueble (dirección o barrio · m² · habitaciones · estado · planta si lo sabes) y te devuelvo rango orientativo basado en transacciones reales últimos 12 meses en la zona, ajustado con datos de portales y nuestra BBDD interna.\n\nEjemplo: "Russafa 3 hab 85m² 2ª planta a reformar"\n→ Rango: 195.000 - 220.000 €.\n→ Tiempo medio venta: 45-60 días.\n→ Mejora del 12% si reformamos antes (ROI 4x).',
+    },
+  ];
+
+  function AsistenteView() {
+    var [selected, setSelected] = useState(null);
+    var [streaming, setStreaming] = useState('');
+    var [streamingIdx, setStreamingIdx] = useState(0);
+    var [inputValue, setInputValue] = useState('');
+    var [historial, setHistorial] = useState([]);
+
+    useEffect(function() {
+      if (!selected) return;
+      setStreaming('');
+      setStreamingIdx(0);
+      var preset = PRESETS.filter(function(p) { return p.id === selected; })[0];
+      var full = preset.respuesta;
+      var i = 0;
+      var timer = setInterval(function() {
+        i += 3;
+        setStreamingIdx(i);
+        if (i >= full.length) { clearInterval(timer); }
+      }, 20);
+      return function() { clearInterval(timer); };
+    }, [selected]);
+
+    var preset = PRESETS.filter(function(p) { return p.id === selected; })[0];
+    var displayedText = preset ? preset.respuesta.slice(0, streamingIdx) : '';
+    var stillStreaming = preset && streamingIdx < preset.respuesta.length;
+
+    function enviarLibre() {
+      if (!inputValue.trim()) return;
+      var q = inputValue.trim();
+      var r;
+      var ql = q.toLowerCase();
+      if (ql.indexOf('russafa') >= 0 || ql.indexOf('benimaclet') >= 0 || ql.indexOf('valoración') >= 0 || ql.indexOf('cuánto vale') >= 0) {
+        r = 'Russafa zona alta demanda · rango orientativo según m² y estado: 2.400-3.100 €/m² para reformado · 1.900-2.450 €/m² para a reformar. Te lo afino si me dices dirección concreta o m².';
+      } else if (ql.indexOf('comisión') >= 0 || ql.indexOf('comision') >= 0) {
+        r = 'Comisiones medias del mercado Valencia · venta: 3-5% del precio + IVA · alquiler: 1 mensualidad al propietario + 1 al inquilino. Las que aplica Cercasa exactamente las tienes en la ficha "Servicios" del CRM cuando lo abras con cliente real.';
+      } else if (ql.indexOf('inquilino') >= 0 && (ql.indexOf('compra') >= 0 || ql.indexOf('venta') >= 0)) {
+        r = 'Hay 12 inquilinos con perfil VIP candidatos a compra ahora mismo (≥3 años + pago puntual). 4 ya están en proceso activo con la IA. ¿Quieres que active sondeo en los otros 8?';
+      } else if (ql.indexOf('germán') >= 0 || ql.indexOf('german') >= 0) {
+        r = 'Germán Martínez tiene hoy: 2 visitas (Russafa 220k María Tortajada · Local Patraix Pedro Catalá), 4 leads cualificados pendientes de primer contacto y 1 reunión interna con Carlos (financiero) por la simulación Laura Sanchis. Carga estimada del día: 7,5h.';
+      } else {
+        r = 'No tengo todavía datos suficientes para responderte con concreción a esa pregunta. En una implementación real esto consultaría a Trello/CRM, datos de mercado de los portales en directo y conversaciones históricas con los clientes mencionados. ¿Reformulas o pruebas con otro de los 4 botones de arriba?';
+      }
+      setHistorial([{ q: q, r: r }].concat(historial));
+      setInputValue('');
+    }
+
+    return h('div', { className: 'p-5 md:p-8 space-y-6 max-w-[1400px] mx-auto' },
+      h('div', null,
+        h('h2', { className: 'text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2' },
+          h('span', { className: 'text-cercasa-600' }, h(Icon, { d: I.sparkles, size: 24 })),
+          'Asistente IA · 4 acciones rápidas + chat libre'
+        ),
+        h('p', { className: 'text-sm text-gray-500 mt-1 max-w-3xl' },
+          'Pregunta libre a la IA con contexto completo del sistema (cartera, leads, alquileres, BBDD, comerciales asignados). 4 acciones rápidas para los 4 dolores top.'
+        )
+      ),
+
+      h('div', { className: 'grid md:grid-cols-2 gap-3' },
+        PRESETS.map(function(p) {
+          return h('button', {
+            key: p.id,
+            onClick: function() { setSelected(p.id); },
+            className: cls(
+              'flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all',
+              selected === p.id ? 'border-cercasa-500 bg-cercasa-50' : 'border-gray-200 bg-white hover:border-cercasa-300'
+            ),
+          },
+            h('div', { className: 'w-10 h-10 rounded-lg bg-cercasa-100 text-cercasa-700 flex items-center justify-center flex-shrink-0' }, h(Icon, { d: p.icon, size: 20 })),
+            h('div', { className: 'flex-1' },
+              h('div', { className: 'font-semibold text-gray-900 text-sm' }, p.label),
+              h('div', { className: 'text-xs text-gray-500 mt-0.5' }, selected === p.id ? 'IA respondiendo…' : 'Click para preguntar')
+            )
+          );
+        })
+      ),
+
+      selected && h('div', { className: 'bg-white rounded-2xl p-5 md:p-6 border-2 border-cercasa-200 shadow-sm anim-fade' },
+        h('div', { className: 'flex items-center gap-2 mb-3 text-xs text-cercasa-700 font-semibold uppercase tracking-wide' },
+          h('span', { className: 'w-2 h-2 rounded-full bg-cercasa-500', style: stillStreaming ? { animation: 'pulse 1.5s infinite' } : null }),
+          stillStreaming ? 'Generando respuesta…' : 'Respuesta IA',
+          stillStreaming && h('span', { className: 'text-gray-400 normal-case font-normal' }, '(consultando CRM + datos de mercado…)')
+        ),
+        h('div', {
+          className: cls('text-gray-800 whitespace-pre-line leading-relaxed text-sm md:text-base', stillStreaming && 'typing-cursor'),
+        }, displayedText)
+      ),
+
+      h('div', { className: 'bg-white rounded-2xl p-4 border border-gray-200 shadow-sm' },
+        h('div', { className: 'flex gap-2' },
+          h('input', {
+            type: 'text',
+            value: inputValue,
+            onChange: function(e) { setInputValue(e.target.value); },
+            onKeyDown: function(e) { if (e.key === 'Enter') enviarLibre(); },
+            placeholder: 'Pregunta libre · ej: "¿qué tiene hoy Germán?", "valoración Russafa 3 hab", "inquilinos con potencial de compra"',
+            className: 'flex-1 px-4 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-cercasa-500',
+          }),
+          h('button', {
+            onClick: enviarLibre,
+            className: 'bg-cercasa-500 hover:bg-cercasa-600 text-white px-5 rounded-lg font-semibold text-sm flex items-center gap-2 transition-colors',
+          },
+            h(Icon, { d: I.send, size: 16 }),
+            'Preguntar'
+          )
+        ),
+        h('div', { className: 'text-[11px] text-gray-400 mt-2 px-1' }, 'Sugerencias contextuales: ¿Te ayudo a generar la valoración del piso de María Tortajada? · ¿Activo sondeo en los 8 VIP pendientes?')
+      ),
+
+      historial.length > 0 && h('div', { className: 'space-y-3' },
+        historial.map(function(it, i) {
+          return h('div', { key: i, className: 'space-y-2 anim-fade' },
+            h('div', { className: 'bg-cercasa-50 rounded-xl px-4 py-3 text-sm font-medium text-cercasa-900 ml-12' }, it.q),
+            h('div', { className: 'bg-white rounded-xl px-4 py-3 text-sm text-gray-700 border border-gray-100 mr-12 shadow-sm' }, it.r)
+          );
+        })
+      )
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // COMPONENT · TourGuiado
+  // ─────────────────────────────────────────────────────────────
+  function TourGuiado(props) {
+    return h('div', { className: 'tour-spotlight', onClick: props.onClose },
+      h('div', { className: 'tour-box', onClick: function(e) { e.stopPropagation(); } },
+        h('div', { className: 'flex items-center gap-3 mb-3' },
+          h('div', { className: 'w-10 h-10 rounded-full bg-cercasa-100 text-cercasa-700 flex items-center justify-center' }, h(Icon, { d: I.sparkles, size: 22 })),
+          h('div', null,
+            h('div', { className: 'font-bold text-gray-900' }, 'Bienvenido a la demo de Cercasa'),
+            h('div', { className: 'text-xs text-gray-500' }, 'Prototipo visual · Iván Fyzon · 26 may 2026')
+          )
+        ),
+        h('p', { className: 'text-sm text-gray-700 leading-relaxed mb-3' },
+          'Esta demo ataca los ', h('strong', null, '3 frentes'), ' que comentamos:'
+        ),
+        h('ul', { className: 'space-y-2 mb-4 text-sm text-gray-700' },
+          h('li', { className: 'flex items-start gap-2' },
+            h('span', { className: 'text-cercasa-600 mt-0.5' }, '›'),
+            h('span', null, h('strong', null, 'Captador IA'), ' (estrella) · cualifica leads Meta Ads con cadencia multicanal real')
+          ),
+          h('li', { className: 'flex items-start gap-2' },
+            h('span', { className: 'text-cercasa-600 mt-0.5' }, '›'),
+            h('span', null, h('strong', null, 'Alquileres + alertas'), ' · 2.014 contratos con badge por vencimiento')
+          ),
+          h('li', { className: 'flex items-start gap-2' },
+            h('span', { className: 'text-cercasa-600 mt-0.5' }, '›'),
+            h('span', null, h('strong', null, 'Agente Renovación'), ' · sondea al inquilino a T-90 días para conversión a comprador')
+          ),
+          h('li', { className: 'flex items-start gap-2' },
+            h('span', { className: 'text-cercasa-600 mt-0.5' }, '›'),
+            h('span', null, h('strong', null, 'Asistente IA'), ' · pregunta libre sobre toda la operativa')
+          )
+        ),
+        h('div', { className: 'bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 mb-4' },
+          h('strong', null, '⚠ Es un prototipo. '),
+          'Está hecho para validar contigo si entendemos bien vuestra operativa. Lo que veas y no encaje · lo cambiamos en la siguiente versión.'
+        ),
+        h('button', {
+          onClick: props.onClose,
+          className: 'w-full bg-cercasa-500 hover:bg-cercasa-600 text-white font-semibold py-2.5 rounded-lg transition-colors',
+        }, 'Vamos a verlo')
+      )
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // APP ROOT
+  // ─────────────────────────────────────────────────────────────
+  function App() {
+    var [user, setUser] = useState(null);
+    var [view, setView] = useState('dashboard');
+    var [sidebarExpanded, setSidebarExpanded] = useState(window.innerWidth > 768);
+    var [tourShown, setTourShown] = useState(false);
+    var [notifs, setNotifs] = useState([NOTIFS[0]]);
+
+    useEffect(function() {
+      var saved = loadState();
+      if (saved.user) {
+        var found = USERS.filter(function(u) { return u.id === saved.user; })[0];
+        if (found) setUser(found);
+      }
+      if (saved.tourShown) setTourShown(true);
+    }, []);
+
+    useEffect(function() {
+      if (!user) return;
+      // Drip de notifs
+      var idx = 1;
+      var timer = setInterval(function() {
+        if (idx >= NOTIFS.length) { clearInterval(timer); return; }
+        setNotifs(function(arr) { return arr.concat([NOTIFS[idx]]); });
+        idx++;
+      }, 6500);
+      return function() { clearInterval(timer); };
+    }, [user]);
+
+    function login(u) {
+      setUser(u);
+      saveState({ user: u.id });
+    }
+    function logout() {
+      setUser(null);
+      saveState({ user: null });
+    }
+    function closeTour() {
+      setTourShown(true);
+      saveState({ tourShown: true });
+    }
+
+    if (!user) return h(LoginScreen, { onLogin: login });
+
+    var titles = {
+      dashboard:  { t: 'Dashboard', s: 'Vista panorámica de la operativa Cercasa' },
+      captador:   { t: 'Captador IA · Venta', s: 'Comercial IA #1 · pipeline de leads' },
+      alquileres: { t: 'Alquileres activos',  s: '2.014 contratos · alertas vencimiento' },
+      renovacion: { t: 'Agente Renovación',   s: 'Comercial IA #2 · venta al inquilino' },
+      asistente:  { t: 'Asistente IA',        s: 'Pregunta libre sobre toda la operativa' },
+    };
+
+    return h(Fragment, null,
+      h('div', { className: 'flex min-h-screen' },
+        h(Sidebar, { view: view, setView: setView, expanded: sidebarExpanded, setExpanded: setSidebarExpanded, user: user, onLogout: logout }),
+        h('div', { className: 'flex-1 min-w-0 flex flex-col' },
+          h(Topbar, { title: titles[view].t, subtitle: titles[view].s, user: user }),
+          h('main', { className: 'flex-1 bg-gray-50 overflow-y-auto' },
+            view === 'dashboard'  && h(DashboardView,  { user: user, notifs: notifs }),
+            view === 'captador'   && h(CaptadorView,   {}),
+            view === 'alquileres' && h(AlquileresView, { setView: setView }),
+            view === 'renovacion' && h(RenovacionView, {}),
+            view === 'asistente'  && h(AsistenteView,  {})
+          )
+        )
+      ),
+      !tourShown && h(TourGuiado, { onClose: closeTour })
+    );
+  }
+
+  // RENDER
+  try {
+    var rootEl = document.getElementById('root');
+    var root = ReactDOM.createRoot(rootEl);
+    root.render(h(App));
+    setTimeout(function() {
+      var loader = document.getElementById('initial-loader');
+      if (loader) loader.style.transition = 'opacity 0.3s';
+      if (loader) loader.style.opacity = '0';
+      setTimeout(function() { if (loader) loader.remove(); }, 300);
+    }, 150);
+  } catch (err) {
+    window.onerror && window.onerror(err.message, '', 0, 0, err);
+  }
+})();
+</script>
+
+</body>
+</html>
